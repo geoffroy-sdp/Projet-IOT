@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Page Principale Electron</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f0f0f0;
+      color: #333;
+    }
+    h1 {
+      color: #0078d7;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005a9e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bienvenue dans votre application Electron !</h1>
+  <p>Ceci est la page principale.</p>
+  <button id="clickMe">Cliquez-moi</button>
+
+  <script>
+    const button = document.getElementById('clickMe');
+    button.addEventListener('click', () => {
+      alert('Bouton cliqué !');
+    });
+  </script>
+</body>
+</html>
