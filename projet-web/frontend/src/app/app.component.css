@@ -1,0 +1,10 @@
+#button-panel {
+  height: 100%;
+  width: auto ; 
+  display: flex;
+  flex-direction: column;
+}
+.buttons {
+  margin: 10px;
+  margin-top: 15px;
+}

@@ -9,10 +9,19 @@ import { AppComponent } from './component/AppsComponent/apps-component';
   styleUrl: './app.component.css'
 })
 export class App {
-  button!: button;
-
+  button1!: button;
+  button2!: button;
+  button3!: button;
+  button4!: button;
   constructor() {
-    this.button = new button();
-    this.button.str = "/img/map.png";
+    this.button1 = new button();
+    this.button1.str = "/img/map.svg";
+    this.button2 = new button();
+    this.button2.str = "/img/music-alt.svg";
+    this.button3 = new button();
+    this.button3.str = "/img/bluetooth.svg";
+    this.button4 = new button();
+    this.button4.str = "/img/gear.svg";
   }
+
 }

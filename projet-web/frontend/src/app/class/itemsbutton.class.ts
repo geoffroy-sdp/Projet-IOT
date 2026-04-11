@@ -1,3 +1,3 @@
 export class button {
-  str : string = "/img/home.png"
+  str : string = "/img/home.svg"
 }
