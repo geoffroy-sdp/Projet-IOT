@@ -1,0 +1,16 @@
+
+<div class="settings-container">
+  <h2>Paramètres</h2>
+  
+  <div class="setting-item">
+    <label for="darkModeToggle">Mode Sombre</label>
+    <button 
+      id="darkModeToggle"
+      class="toggle-btn" 
+      [class.active]="isDarkMode"
+      (click)="toggleDarkMode()">
+      <span class="toggle-circle"></span>
+    </button>
+    <span class="toggle-status">{{ isDarkMode ? 'Activé' : 'Désactivé' }}</span>
+  </div>
+</div>

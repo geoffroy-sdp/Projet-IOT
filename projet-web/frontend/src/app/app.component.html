@@ -1,17 +1,31 @@
-<div id='button-panel'>
-  <div class="buttons">
-    <box-apps></box-apps>
+<div id="main-container">
+  <div id='button-panel'>
+    <div id="groupe_buttons">
+      <div class="buttons">
+        <box-buttons (buttonClicked)="onHomeClick()"></box-buttons>
+      </div>
+      <div class="buttons">
+        <box-buttons [my-button]="button1" (buttonClicked)="onButton1Click()"></box-buttons>
+      </div>
+      <div class="buttons">
+        <box-buttons [my-button]="button2" (buttonClicked)="onButton2Click()"></box-buttons>
+      </div>
+      <div class="buttons">
+        <box-buttons [my-button]="button3" (buttonClicked)="onButton3Click()"></box-buttons>
+      </div>
+      <div class="buttons">
+        <box-buttons [my-button]="button4" (buttonClicked)="onButton4Click()"></box-buttons>
+      </div>
+    </div>
   </div>
-  <div class="buttons">
-    <box-apps [my-button]="button1"></box-apps>
-  </div>
-  <div class="buttons">
-    <box-apps [my-button]="button2"></box-apps>
-  </div>
-  <div class="buttons">
-    <box-apps [my-button]="button3"></box-apps>
-  </div>
-  <div class="buttons">
-    <box-apps [my-button]="button4"></box-apps>
+
+  <div id='app-panel'>
+    <div class="apps">
+      <app-app-home *ngIf="currentPage === 'home'"></app-app-home>
+      <app-app-map *ngIf="currentPage === 'map'"></app-app-map>
+      <app-app-music *ngIf="currentPage === 'music'"></app-app-music>
+      <app-app-bluetooth *ngIf="currentPage === 'bluetooth'"></app-app-bluetooth>
+      <app-setting *ngIf="currentPage === 'settings'"></app-setting>
+    </div>
   </div>
 </div>
