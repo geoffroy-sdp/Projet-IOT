@@ -21,7 +21,7 @@ html.dark-mode {
 }
 
 html, body {
-  overflow: hidden;
+  overflow: hidden; /* ou supprime cette ligne */
   background-color: var(--bg-color);
   color: var(--text-color);
   transition: background-color 0.3s ease, color 0.3s ease;
