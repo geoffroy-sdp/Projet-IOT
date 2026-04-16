@@ -2,8 +2,7 @@
   "name": "frontend",
   "version": "0.0.0",
   "scripts": {
-    "start": "ng serve",
-    "start:prod": "node server.js",
+    "start": "node server.js",
     "start:dev": "ng serve --host 0.0.0.0 --port 3000",
     "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",

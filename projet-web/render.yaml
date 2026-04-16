@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: frontend
+    root_dir: frontend
+    build_command: npm run build
+    start_command: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
