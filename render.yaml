@@ -1,7 +1,7 @@
 services:
   - type: web
     name: frontend
-    root_dir: frontend
+    root_dir: projet-web/frontend
     build_command: npm run build
     start_command: npm start
     envVars:
