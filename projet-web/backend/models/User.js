@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Admin flag
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+
     // Tokens
     refreshToken: {
       type: String,

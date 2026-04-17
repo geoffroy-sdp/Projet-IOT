@@ -34,7 +34,6 @@ const metadataSchema = new mongoose.Schema(
     lastLocation: {
       latitude: Number,
       longitude: Number,
-      address: String,
       timestamp: Date,
     },
 
