@@ -20,6 +20,22 @@ const formatLogEntry = (level, message, data = {}) => {
   const hostname = os.hostname();
   const pid = process.pid;
 
+  // Remplaceur pour gérer les structures circulaires
+  const seen = new WeakSet();
+  const replacer = (key, value) => {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        return '[Circular]';
+      }
+      seen.add(value);
+    }
+    // Ignorer les propriétés problématiques
+    if (key === 'socket' || key === 'parser' || key === 'req' || key === '_readableState') {
+      return undefined;
+    }
+    return value;
+  };
+
   return JSON.stringify({
     timestamp,
     level: level.toUpperCase(),
@@ -27,7 +43,7 @@ const formatLogEntry = (level, message, data = {}) => {
     hostname,
     pid,
     ...data
-  }) + '\n';
+  }, replacer) + '\n';
 };
 
 // Fonction utilitaire pour écrire dans un fichier

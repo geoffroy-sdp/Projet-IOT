@@ -175,26 +175,28 @@ const logSecurityEvent = (event, data) => {
 
 const logAuthSuccess = (req, user) => {
   logger.security('SUCCESSFUL_LOGIN', {
-    req,
     userId: user._id,
     email: user.email,
-    ip: req.ip
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    method: req.method,
+    path: req.path
   });
 };
 
 const logLogout = (req, userId) => {
   logger.security('USER_LOGOUT', {
-    req,
     userId,
-    ip: req.ip
+    ip: req.ip,
+    userAgent: req.get('User-Agent')
   });
 };
 
 const logPasswordChange = (req, userId) => {
   logger.security('PASSWORD_CHANGED', {
-    req,
     userId,
-    ip: req.ip
+    ip: req.ip,
+    userAgent: req.get('User-Agent')
   });
 };
 

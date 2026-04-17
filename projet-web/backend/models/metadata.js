@@ -102,8 +102,7 @@ const metadataSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index pour optimiser les requêtes
-metadataSchema.index({ userId: 1 });
+// Index pour optimiser les requêtes (userId a déjà un index automatique via unique: true)
 metadataSchema.index({ lastConnectionTime: -1 });
 metadataSchema.index({ 'musicHistory.playedAt': -1 });
 
