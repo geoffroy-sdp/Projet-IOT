@@ -33,6 +33,11 @@ router.delete('/sessions/:sessionId', authMiddleware, userController.deleteSessi
 router.get('/metadata', authMiddleware, userController.getUserMetadata);
 router.put('/metadata', authMiddleware, userController.updateMetadata);
 
+
+// Music routes (alternative endpoints)
+router.get('/music/last', authMiddleware, userController.getLastMusic);
+router.put('/music/last', authMiddleware, userController.updateLastMusic);
+
 // Complete user data export
 router.get('/data/export', authMiddleware, userController.exportAllUserData);
 

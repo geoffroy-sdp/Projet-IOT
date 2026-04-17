@@ -4,6 +4,8 @@ const Gps = require('../models/Gps');
 const Session = require('../models/Session');
 const Metadata = require('../models/Metadata');
 const { generateToken, generateRefreshToken } = require('../middleware/auth');
+const { logger } = require('../models/logger');
+const { logAuthSuccess, logLogout, logPasswordChange } = require('../middleware/security');
 
 exports.registerUser = async (req, res) => {
   try {
@@ -100,6 +102,9 @@ exports.loginUser = async (req, res) => {
 
     user.refreshToken = refreshToken;
     await user.save();
+
+    // Logger la connexion réussie
+    logAuthSuccess(req, user);
 
     res.status(200).json({
       success: true,
@@ -281,6 +286,9 @@ exports.changePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
+
+    // Logger le changement de mot de passe
+    logPasswordChange(req, userId);
 
     res.status(200).json({
       success: true,
