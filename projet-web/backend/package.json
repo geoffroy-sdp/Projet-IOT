@@ -4,8 +4,8 @@
   "description": "backend",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
-    "dev": "nodemon main.js",
+    "start": "node ../start.js",
+    "start:dev": "node main.js",
     "seed": "node seed.js",
     "test": "node testScript.js"
   },

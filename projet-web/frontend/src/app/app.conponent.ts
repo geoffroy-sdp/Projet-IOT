@@ -35,7 +35,7 @@ export class App implements OnInit {
   }
 
   checkAuthentication() {
-    this.deleteLocalStorage();
+    //this.deleteLocalStorage();
     const loggedIn = localStorage.getItem('isLoggedIn');
     this.isLoggedIn = loggedIn === 'true';
     
