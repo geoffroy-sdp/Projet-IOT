@@ -1,3 +1,5 @@
+const { logger } = require('../models/logger');
+
 const securityMiddleware = (req, res, next) => {
   // Amélioration des en-têtes de sécurité
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -73,9 +75,137 @@ const requestLoggingMiddleware = (req, res, next) => {
   next();
 };
 
+// Middleware de sécurité avancé pour logger les événements suspects
+const securityLoggerMiddleware = (req, res, next) => {
+  const originalSend = res.send;
+  const originalJson = res.json;
+
+  // Intercepter les réponses pour logger les erreurs d'authentification
+  res.send = function(data) {
+    // Logger les tentatives de connexion échouées
+    if (req.path.includes('/login') && res.statusCode === 401) {
+      logger.security('FAILED_LOGIN_ATTEMPT', {
+        req,
+        email: req.body?.email,
+        reason: 'Invalid credentials'
+      });
+    }
+
+    // Logger les accès non autorisés
+    if (res.statusCode === 401 || res.statusCode === 403) {
+      logger.security('UNAUTHORIZED_ACCESS', {
+        req,
+        path: req.path,
+        method: req.method,
+        statusCode: res.statusCode
+      });
+    }
+
+    // Logger les erreurs de validation
+    if (res.statusCode === 400 && req.body) {
+      logger.security('VALIDATION_ERROR', {
+        req,
+        body: req.body,
+        errors: data?.errors || data
+      });
+    }
+
+    return originalSend.call(this, data);
+  };
+
+  res.json = function(data) {
+    // Logger les erreurs d'authentification JSON
+    if (req.path.includes('/login') && res.statusCode === 401) {
+      logger.security('FAILED_LOGIN_ATTEMPT', {
+        req,
+        email: req.body?.email,
+        reason: data?.message || 'Invalid credentials'
+      });
+    }
+
+    return originalJson.call(this, data);
+  };
+
+  // Logger les tentatives d'accès à des routes admin sans clé
+  if (req.path.startsWith('/admin') && !req.headers['x-admin-key']) {
+    logger.security('MISSING_ADMIN_KEY', {
+      req,
+      path: req.path
+    });
+  }
+
+  // Logger les requêtes avec des tokens invalides
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    const token = req.headers.authorization.substring(7);
+    if (token.length < 10) { // Token suspect (trop court)
+      logger.security('SUSPICIOUS_TOKEN', {
+        req,
+        tokenLength: token.length
+      });
+    }
+  }
+
+  // Logger les requêtes avec des payloads trop grands (possible attaque)
+  if (req.headers['content-length'] && parseInt(req.headers['content-length']) > 1000000) { // 1MB
+    logger.security('LARGE_PAYLOAD', {
+      req,
+      contentLength: req.headers['content-length']
+    });
+  }
+
+  // Logger les requêtes répétées depuis la même IP (possible brute force)
+  const clientIP = req.ip || req.connection.remoteAddress;
+  if (clientIP) {
+    const suspiciousIPs = process.env.SUSPICIOUS_IPS?.split(',') || [];
+    if (suspiciousIPs.includes(clientIP)) {
+      logger.security('SUSPICIOUS_IP_ACCESS', {
+        req,
+        ip: clientIP
+      });
+    }
+  }
+
+  next();
+};
+
+// Fonctions utilitaires pour logger les événements de sécurité
+const logSecurityEvent = (event, data) => {
+  logger.security(event, data);
+};
+
+const logAuthSuccess = (req, user) => {
+  logger.security('SUCCESSFUL_LOGIN', {
+    req,
+    userId: user._id,
+    email: user.email,
+    ip: req.ip
+  });
+};
+
+const logLogout = (req, userId) => {
+  logger.security('USER_LOGOUT', {
+    req,
+    userId,
+    ip: req.ip
+  });
+};
+
+const logPasswordChange = (req, userId) => {
+  logger.security('PASSWORD_CHANGED', {
+    req,
+    userId,
+    ip: req.ip
+  });
+};
+
 module.exports = {
   securityMiddleware,
   corsMiddleware,
   rateLimitMiddleware,
   requestLoggingMiddleware,
+  securityLoggerMiddleware,
+  logSecurityEvent,
+  logAuthSuccess,
+  logLogout,
+  logPasswordChange,
 };

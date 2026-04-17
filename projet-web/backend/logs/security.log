@@ -1,0 +1,2 @@
+{"timestamp":"2026-04-17T09:03:20.925Z","level":"WARN","message":"Security logging test","hostname":"UnErmite","pid":7640,"test":true,"userId":"anonymous"}
+{"timestamp":"2026-04-17T09:03:20.941Z","level":"WARN","message":"SECURITY: CUSTOM_TEST_EVENT","hostname":"UnErmite","pid":7640,"test":true,"customData":"Additional security test data","userId":"anonymous"}
