@@ -1,0 +1,128 @@
+<div class="signup-container">
+  <div class="signup-box">
+    <div class="signup-header">
+      <h1>Créer un compte</h1>
+      <p>Rejoignez-nous pour commencer</p>
+    </div>
+
+    <form (ngSubmit)="signup()" class="signup-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">Prénom</label>
+          <input
+            type="text"
+            id="firstName"
+            [(ngModel)]="firstName"
+            name="firstName"
+            placeholder="Jean"
+            [disabled]="isLoading"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Nom</label>
+          <input
+            type="text"
+            id="lastName"
+            [(ngModel)]="lastName"
+            name="lastName"
+            placeholder="Dupont"
+            [disabled]="isLoading"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="signupEmail">Email</label>
+        <input
+          type="email"
+          id="signupEmail"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="jean.dupont@example.com"
+          [disabled]="isLoading"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="username">Nom d'utilisateur</label>
+        <input
+          type="text"
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          placeholder="jean_dupont"
+          [disabled]="isLoading"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="signupPassword">Mot de passe</label>
+        <input
+          type="password"
+          id="signupPassword"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Minimum 8 caractères"
+          [disabled]="isLoading"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmer le mot de passe</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          placeholder="Confirmer votre mot de passe"
+          [disabled]="isLoading"
+          required
+        />
+      </div>
+
+      <div *ngIf="signupError" class="error-message">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <span>{{ signupError }}</span>
+      </div>
+
+      <div *ngIf="passwordError" class="error-message">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <span>{{ passwordError }}</span>
+      </div>
+
+      <div class="form-group checkbox">
+        <input
+          type="checkbox"
+          id="agreeTerms"
+          [(ngModel)]="agreeTerms"
+          name="agreeTerms"
+          [disabled]="isLoading"
+        />
+        <label for="agreeTerms">J'accepte les conditions d'utilisation</label>
+      </div>
+
+      <button type="submit" class="signup-button" [class.loading]="isLoading" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Créer mon compte</span>
+        <span *ngIf="isLoading" class="loader"></span>
+      </button>
+    </form>
+
+    <div class="signup-footer">
+      <p>Déjà inscrit? 
+        <button type="button" class="link-button" (click)="onBackClick()" [disabled]="isLoading">
+          Se connecter
+        </button>
+      </p>
+    </div>
+  </div>
+</div>
