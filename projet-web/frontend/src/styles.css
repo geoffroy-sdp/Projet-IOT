@@ -64,3 +64,8 @@ app-root {
     font-size: 12px;
   }
 }
+
+.login-wrapper {
+  height: 100vh;
+  width: 100vw;
+}

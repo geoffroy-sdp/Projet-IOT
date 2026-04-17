@@ -4,17 +4,23 @@
   "description": "backend",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
-    "dev": "nodemon main.js"
+    "start": "node ../start.js",
+    "start:dev": "node main.js",
+    "seed": "node seed.js",
+    "test": "node testScript.js"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.6.2",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",
     "express": "^4.22.1",
-    "mongoose": "^9.4.1"
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.4.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
