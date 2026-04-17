@@ -121,9 +121,9 @@ app.use((error, req, res, next) => {
 
 connectDatabase().then(() => {
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📝 Logging system initialized`);
-    console.log(`📊 Logs available at: /logs/{error|requests|security|combined|debug}`);
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Logging system initialized`);
+    console.log(`Logs available at: /logs/{error|requests|security|combined|debug}`);
   });
 }).catch(error => {
   logger.error('Failed to connect database', { error: error.message });

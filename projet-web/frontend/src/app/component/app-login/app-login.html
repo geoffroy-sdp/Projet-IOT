@@ -1,0 +1,73 @@
+<div class="login-container">
+  <div class="login-box">
+    <h2>Connexion</h2>
+    
+    <div *ngIf="loginError" class="error-message">
+      <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
+fill="currentColor" viewBox="0 0 24 24" >
+<!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+<path d="M11 9h2v6h-2zm0 8h2v2h-2z"></path><path d="M12.87 2.51c-.35-.63-1.4-.63-1.75 0l-9.99 18c-.17.31-.17.69.01.99.18.31.51.49.86.49h20c.35 0 .68-.19.86-.49a1 1 0 0 0 .01-.99zM3.7 20 12 5.06 20.3 20z"></path>
+</svg>
+      {{ loginError }}
+    </div>
+
+    <form (ngSubmit)="login()" class="login-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Entrez votre email"
+          [(ngModel)]="email"
+          class="form-input"
+          [disabled]="isLoading"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Entrez votre mot de passe"
+          [(ngModel)]="password"
+          class="form-input"
+          [disabled]="isLoading"
+          required
+        />
+      </div>
+
+      <div class="form-group checkbox">
+        <input
+          type="checkbox"
+          id="rememberMe"
+          name="rememberMe"
+          [(ngModel)]="rememberMe"
+          class="checkbox-input"
+          [disabled]="isLoading"
+        />
+        <label for="rememberMe" class="checkbox-label">Se souvenir de moi</label>
+      </div>
+
+      <button 
+        type="submit" 
+        class="login-btn"
+        [disabled]="isLoading"
+        [class.loading]="isLoading"
+      >
+        <span *ngIf="!isLoading">Se connecter</span>
+        <span *ngIf="isLoading" class="loader"></span>
+        <span *ngIf="isLoading" class="loading-text">Connexion...</span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <button type="button" class="footer-link" (click)="onForgotPasswordClick()" [disabled]="isLoading">Mot de passe oublié?</button>
+      <span class="divider">•</span>
+      <button type="button" class="footer-link" (click)="onSignupClick()" [disabled]="isLoading">Créer un compte</button>
+    </div>
+  </div>
+</div>

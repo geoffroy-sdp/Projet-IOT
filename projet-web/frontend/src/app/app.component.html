@@ -1,4 +1,5 @@
-<div id="main-container">
+<div *ngIf="isLoggedIn" id="main-container">
+
   <div id='button-panel'>
     <div id="groupe_buttons">
       <div class="buttons">
@@ -28,4 +29,27 @@
       <app-setting *ngIf="currentPage === 'settings'"></app-setting>
     </div>
   </div>
+
+</div>
+
+<!-- Auth pages: Login, Signup, Forgot Password -->
+<div class="login-wrapper" *ngIf="!isLoggedIn">
+  <app-login
+    *ngIf="authPage === 'login'"
+    (loginSuccess)="handleLogin()"
+    (signupClick)="goToSignup()"
+    (forgotPasswordClick)="goToForgotPassword()">
+  </app-login>
+
+  <app-signup
+    *ngIf="authPage === 'signup'"
+    (signupSuccess)="handleSignupSuccess()"
+    (backToLogin)="goToLogin()">
+  </app-signup>
+
+  <app-forgot-password
+    *ngIf="authPage === 'forgot-password'"
+    (resetSuccess)="handleResetSuccess()"
+    (backToLogin)="goToLogin()">
+  </app-forgot-password>
 </div>
