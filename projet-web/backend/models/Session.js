@@ -107,12 +107,8 @@ const sessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-',  (next)     next();
+// Middleware pour calculer la durée avant de sauvegarder
 sessionSchema.pre('save', async function() {
-  if (this.endTime && this.startTime) {
-    this.duration = Math.floor((this.endTime - this.startTime) / 1000);
-  }
-});
   if (this.endTime && this.startTime) {
     this.duration = Math.floor((this.endTime - this.startTime) / 1000);
   }
