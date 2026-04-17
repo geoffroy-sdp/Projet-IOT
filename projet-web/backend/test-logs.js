@@ -2,7 +2,7 @@ const { logger } = require('./models/logger');
 const { logSecurityEvent } = require('./middleware/security');
 
 async function testLoggingSystem() {
-  console.log('🧪 Test du système de logging...\n');
+  console.log(' Test du système de logging...\n');
 
   // Test des différents types de logs
   await logger.error('Test error logging', {
@@ -36,8 +36,8 @@ async function testLoggingSystem() {
     customData: 'Additional security test data'
   });
 
-  console.log('✅ Tests de logging terminés !');
-  console.log('📁 Vérifiez les fichiers dans le dossier logs/');
+  console.log(' Tests de logging terminés !');
+  console.log(' Vérifiez les fichiers dans le dossier logs/');
 }
 
 // Exécuter le test si appelé directement
