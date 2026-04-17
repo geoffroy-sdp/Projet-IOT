@@ -1,0 +1,37 @@
+#bluetooth-container {
+  padding: 30px;
+  height: 100%;
+  width: 450px;
+  box-sizing: border-box;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  overflow-y: auto;
+  display: flex;
+}
+
+#bluetooth-container h2 {
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.bluetooth-content {
+  display: flex;
+  flex-wrap: wrap;        /* Permet de passer à la ligne si trop d’éléments */
+  gap: 20px;
+  padding: 25px;
+  position: relative;
+  border-radius: 40px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px var(--shadow-color);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+
+  width: auto;            /* S’adapte au contenu */
+  height: auto;           /* S’adapte au contenu */
+  max-width: 100%;        /* Empêche de dépasser le parent */
+}
+

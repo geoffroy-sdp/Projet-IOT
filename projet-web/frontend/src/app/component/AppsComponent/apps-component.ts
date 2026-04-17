@@ -1,4 +1,5 @@
-import { Component, InputSignal, input, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, input, InputSignal, Output } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { button } from '../../class/itemsbutton.class';
 
 @Component({
@@ -11,6 +12,12 @@ export class AppComponent {
     button: InputSignal<button> = input(new button(), {
   alias: 'my-button',})
   @Output() buttonClicked = new EventEmitter<void>();
+
+  constructor(public sanitizer: DomSanitizer) {}
+
+  getSafeSvg() {
+    return this.sanitizer.bypassSecurityTrustHtml(this.button().svg);
+  }
 
   onButtonClick() {
     this.buttonClicked.emit();

@@ -1,8 +1,8 @@
-<div class="container">
-  <input
-  type="image"
+<div>
+  <button
+  type="button"
   class="button"
-  alt="Menu"
-  src='{{ button().str }}'
-  (click)="onButtonClick()" />
+  title="Menu button"
+  [innerHTML]="getSafeSvg()"
+  (click)="onButtonClick()"></button>
 </div>
