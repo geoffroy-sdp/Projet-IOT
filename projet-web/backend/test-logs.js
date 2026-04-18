@@ -32,9 +32,10 @@ async function testLoggingSystem() {
 
   // Test de l'événement de sécurité personnalisé
   await logSecurityEvent({
-    eventType: 'CUSTOM_TEST_EVENT',
+    eventType: 'suspicious_activity',
     severity: 'medium',
     description: 'Custom test security event',
+    ipAddress: '127.0.0.1',
     additionalData: { test: true, customData: 'Additional security test data' }
   });
 

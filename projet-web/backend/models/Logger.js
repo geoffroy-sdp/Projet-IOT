@@ -68,7 +68,7 @@ class Logger {
     try {
       // Extraire les informations de req si présent
       const req = data.req;
-      const ipAddress = data.ipAddress || req?.ip || req?.connection?.remoteAddress;
+      const ipAddress = data.ipAddress || req?.ip || req?.connection?.remoteAddress || '0.0.0.0';
       const userAgent = data.userAgent || req?.get?.('User-Agent');
       const userId = data.userId || req?.user?._id || req?.user?.userId;
       const username = data.username || req?.user?.username;
