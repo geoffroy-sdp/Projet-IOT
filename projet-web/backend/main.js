@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const { connectDatabase } = require('./config/database');
-const { logger, requestLogger, setupGlobalErrorLogging, cleanupOldLogs } = require('./models/logger');
+const { logger, requestLogger, setupGlobalErrorLogging, cleanupOldLogs } = require('./models/Logger');
 const { securityMiddleware, corsMiddleware, rateLimitMiddleware, securityLoggerMiddleware } = require('./middleware/security');
 const userRoutes = require('./routes/users');
 const adminRoutes = require('./routes/admin');

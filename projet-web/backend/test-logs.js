@@ -1,4 +1,4 @@
-const { logger } = require('./models/logger');
+const { logger } = require('./models/Logger');
 const { logSecurityEvent } = require('./middleware/security');
 
 async function testLoggingSystem() {
