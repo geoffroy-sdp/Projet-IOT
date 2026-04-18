@@ -38,7 +38,7 @@ else if (process.platform === 'linux') {
   setTimeout(() => {
     spawn('gnome-terminal', ['--', 'bash', '-c', 'cd ' + backendPath + ' && npm run start:dev; bash']);
     setTimeout(() => {
-      console.log('\n✓ 2 terminaux lancés avec succès');
+      console.log('\n2 terminaux lancés avec succès');
       process.exit(0);
     }, 500);
   }, 3000);

@@ -16,6 +16,14 @@ const securityLogSchema = new mongoose.Schema(
         'password_change',
         'account_locked',
         'ip_blocked',
+        'FAILED_LOGIN_ATTEMPT',
+        'UNAUTHORIZED_ACCESS',
+        'VALIDATION_ERROR',
+        'MISSING_ADMIN_KEY',
+        'SUSPICIOUS_TOKEN',
+        'LARGE_PAYLOAD',
+        'SUSPICIOUS_IP_ACCESS',
+        'UNAUTHORIZED_LOG_ACCESS',
       ],
       required: true,
       index: true,
@@ -86,14 +94,10 @@ const securityLogSchema = new mongoose.Schema(
   }
 );
 
-// Index géospatial pour les coordonnées
-securityLogSchema.index({ 'location.coordinates': '2dsphere' });
-
 // Index pour les requêtes fréquentes
 securityLogSchema.index({ timestamp: -1 });
-securityLogSchema.index({ userId: 1, timestamp: -1 });
-securityLogSchema.index({ ipAddress: 1, timestamp: -1 });
 securityLogSchema.index({ eventType: 1, timestamp: -1 });
 securityLogSchema.index({ severity: 1, timestamp: -1 });
+securityLogSchema.index({ userId: 1, timestamp: -1 });
 
 module.exports = mongoose.model('SecurityLog', securityLogSchema);

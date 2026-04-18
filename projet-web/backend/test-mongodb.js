@@ -51,7 +51,7 @@ async function runTest() {
     console.log(' RequestLogs restants:', await RequestLog.countDocuments());
 
     await disconnectDatabase();
-    console.log('\n✓ Test terminé!\n');
+    console.log('\nTest terminé!\n');
   } catch (error) {
     console.error('Erreur:', error.message);
     process.exit(1);

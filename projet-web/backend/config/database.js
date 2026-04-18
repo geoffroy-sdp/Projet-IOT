@@ -5,6 +5,7 @@ require('dotenv').config();
 const ErrorLog = require('../models/ErrorLog');
 const SecurityLog = require('../models/SecurityLog');
 const RequestLog = require('../models/RequestLog');
+const Log = require('../models/Log');
 
 const connectDatabase = async () => {
   try {
@@ -25,6 +26,7 @@ const connectDatabase = async () => {
       await ErrorLog.collection.createIndex({ timestamp: -1 });
       await SecurityLog.collection.createIndex({ timestamp: -1 });
       await RequestLog.collection.createIndex({ timestamp: -1 });
+      await Log.collection.createIndex({ timestamp: -1 });
       console.log('Log collections indices created successfully');
     } catch (indexError) {
       console.warn('Warning creating indices:', indexError.message);
@@ -87,6 +89,7 @@ module.exports = {
   ErrorLog,
   SecurityLog,
   RequestLog,
+  Log,
   // Fonctions utilitaires
   logError,
   logSecurityEvent,

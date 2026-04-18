@@ -41,11 +41,11 @@ const requestLogSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
     },
     responseTime: {
-      type: Number, // en millisecondes
+      type: Number,
       default: 0,
     },
     responseSize: {
-      type: Number, // en bytes
+      type: Number,
       default: 0,
     },
     errorMessage: {
@@ -58,13 +58,13 @@ const requestLogSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
     },
     device: {
-      type: String, // mobile, desktop, tablet, etc.
+      type: String,
     },
     referer: {
       type: String,
     },
     protocol: {
-      type: String, // http, https
+      type: String,
     },
     hostname: {
       type: String,
@@ -89,13 +89,8 @@ const requestLogSchema = new mongoose.Schema(
 
 // Index pour les requêtes fréquentes
 requestLogSchema.index({ timestamp: -1 });
-requestLogSchema.index({ userId: 1, timestamp: -1 });
-requestLogSchema.index({ endpoint: 1, timestamp: -1 });
-requestLogSchema.index({ ipAddress: 1, timestamp: -1 });
 requestLogSchema.index({ statusCode: 1, timestamp: -1 });
+requestLogSchema.index({ userId: 1, timestamp: -1 });
 requestLogSchema.index({ method: 1, endpoint: 1, timestamp: -1 });
-
-// Index pour les performances
-requestLogSchema.index({ responseTime: -1 });
 
 module.exports = mongoose.model('RequestLog', requestLogSchema);

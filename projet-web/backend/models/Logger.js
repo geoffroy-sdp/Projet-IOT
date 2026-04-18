@@ -1,135 +1,157 @@
-const fs = require('fs').promises;
-const path = require('path');
-const os = require('os');
+const { logError, logSecurityEvent, logRequest } = require('../config/database');
+const Log = require('./Log');
 
-// Créer le dossier logs s'il n'existe pas
-const LOGS_DIR = path.join(__dirname, '..', 'logs');
-const ensureLogsDir = async () => {
-  try {
-    await fs.mkdir(LOGS_DIR, { recursive: true });
-  } catch (error) {
-    if (error.code !== 'EEXIST') {
-      console.error('Erreur lors de la création du dossier logs:', error);
-    }
-  }
-};
-
-// Fonction utilitaire pour formater les logs
-const formatLogEntry = (level, message, data = {}) => {
-  const timestamp = new Date().toISOString();
-  const hostname = os.hostname();
-  const pid = process.pid;
-
-  // Remplaceur pour gérer les structures circulaires
-  const seen = new WeakSet();
-  const replacer = (key, value) => {
-    if (typeof value === 'object' && value !== null) {
-      if (seen.has(value)) {
-        return '[Circular]';
-      }
-      seen.add(value);
-    }
-    // Ignorer les propriétés problématiques
-    if (key === 'socket' || key === 'parser' || key === 'req' || key === '_readableState') {
-      return undefined;
-    }
-    return value;
-  };
-
-  return JSON.stringify({
-    timestamp,
-    level: level.toUpperCase(),
-    message,
-    hostname,
-    pid,
-    ...data
-  }, replacer) + '\n';
-};
-
-// Fonction utilitaire pour écrire dans un fichier
-const writeToFile = async (filename, content) => {
-  try {
-    await ensureLogsDir();
-    const filePath = path.join(LOGS_DIR, filename);
-    await fs.appendFile(filePath, content, 'utf8');
-  } catch (error) {
-    console.error(`Erreur lors de l'écriture dans ${filename}:`, error);
-  }
-};
-
-// Logger principal
+/**
+ * Logger principal - Utilise MongoDB pour persister les logs
+ */
 class Logger {
   constructor() {
     this.init();
   }
 
   async init() {
-    await ensureLogsDir();
-    console.log(' Système de logging initialisé');
+    console.log('Système de logging MongoDB initialisé');
   }
 
-  // Log des erreurs
+  /**
+   * Log des erreurs - Sauvegardé dans ErrorLog collection
+   */
   async error(message, data = {}) {
-    const logEntry = formatLogEntry('error', message, {
-      ...data,
-      stack: data.error?.stack
-    });
-    await writeToFile('error.log', logEntry);
-    console.error(` ERROR: ${message}`, data);
+    try {
+      await logError({
+        level: 'error',
+        message,
+        stack: data.error?.stack || data.stack,
+        context: data.context,
+        userId: data.userId,
+        endpoint: data.endpoint,
+        method: data.method,
+        statusCode: data.statusCode,
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+        additionalData: data,
+      });
+    } catch (error) {
+      console.error(`Erreur lors de l'enregistrement du log d'erreur:`, error.message);
+    }
+    console.error(`ERROR: ${message}`, data);
   }
 
-  // Log des requêtes HTTP
+  /**
+   * Log des requêtes HTTP - Sauvegardé dans RequestLog collection
+   */
   async request(req, res, responseTime) {
-    const logEntry = formatLogEntry('info', 'HTTP Request', {
-      method: req.method,
-      url: req.originalUrl,
-      ip: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('User-Agent'),
-      statusCode: res.statusCode,
-      responseTime: `${responseTime}ms`,
-      userId: req.user?.userId || 'anonymous',
-      timestamp: new Date().toISOString()
-    });
-    await writeToFile('requests.log', logEntry);
-  }
-
-  // Log des événements de sécurité
-  async security(event, data = {}) {
-    const logEntry = formatLogEntry('warn', `SECURITY: ${event}`, {
-      ...data,
-      ip: data.req?.ip || data.req?.connection?.remoteAddress,
-      userAgent: data.req?.get('User-Agent'),
-      userId: data.req?.user?.userId || 'anonymous',
-      timestamp: new Date().toISOString()
-    });
-    await writeToFile('security.log', logEntry);
-    console.warn(` SECURITY: ${event}`, data);
-  }
-
-  // Log général
-  async info(message, data = {}) {
-    const logEntry = formatLogEntry('info', message, data);
-    await writeToFile('combined.log', logEntry);
-  }
-
-  // Log de debug
-  async debug(message, data = {}) {
-    if (process.env.NODE_ENV === 'development') {
-      const logEntry = formatLogEntry('debug', message, data);
-      await writeToFile('debug.log', logEntry);
-      console.log(` DEBUG: ${message}`, data);
+    try {
+      await logRequest({
+        method: req.method,
+        endpoint: req.originalUrl,
+        statusCode: res.statusCode,
+        userId: req.user?.userId || req.user?._id,
+        username: req.user?.username,
+        ipAddress: req.ip || req.connection.remoteAddress,
+        userAgent: req.get('User-Agent'),
+        requestHeaders: req.headers,
+        responseTime,
+        additionalData: {
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement de la requête:', error.message);
     }
   }
 
-  // Log des warnings
+  /**
+   * Log des événements de sécurité - Sauvegardé dans SecurityLog collection
+   */
+  async security(event, data = {}) {
+    try {
+      // Extraire les informations de req si présent
+      const req = data.req;
+      const ipAddress = data.ipAddress || req?.ip || req?.connection?.remoteAddress;
+      const userAgent = data.userAgent || req?.get?.('User-Agent');
+      const userId = data.userId || req?.user?._id || req?.user?.userId;
+      const username = data.username || req?.user?.username;
+      const endpoint = data.endpoint || req?.originalUrl || req?.path;
+      const method = data.method || req?.method;
+
+      // Créer un objet additionalData sans la clé 'req' pour éviter les problèmes de circular references
+      const { req: _req, ...additionalData } = data;
+
+      await logSecurityEvent({
+        eventType: data.eventType || event,
+        severity: data.severity || 'medium',
+        userId,
+        username,
+        ipAddress,
+        endpoint,
+        method,
+        description: event,
+        userAgent,
+        additionalData,
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement du log de sécurité:', error.message);
+    }
+    console.warn(`SECURITY: ${event}`, data);
+  }
+
+  /**
+   * Log général (info) - Sauvegardé dans Log collection
+   */
+  async info(message, data = {}) {
+    try {
+      const log = new Log({
+        level: 'info',
+        message,
+        data,
+      });
+      await log.save();
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement du log info:', error.message);
+    }
+  }
+
+  /**
+   * Log de debug - Sauvegardé uniquement en développement dans Log collection
+   */
+  async debug(message, data = {}) {
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        const log = new Log({
+          level: 'debug',
+          message,
+          data,
+        });
+        await log.save();
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement du log debug:', error.message);
+      }
+      console.log(`DEBUG: ${message}`, data);
+    }
+  }
+
+  /**
+   * Log des warnings - Sauvegardé dans Log collection
+   */
   async warn(message, data = {}) {
-    const logEntry = formatLogEntry('warn', message, data);
-    await writeToFile('combined.log', logEntry);
-    console.warn(` WARN: ${message}`, data);
+    try {
+      const log = new Log({
+        level: 'warn',
+        message,
+        data,
+      });
+      await log.save();
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement du log warn:', error.message);
+    }
+    console.warn(`WARN: ${message}`, data);
   }
 }
 
-// Middleware Express pour logger les requêtes
+/**
+ * Middleware Express pour logger les requêtes
+ */
 const requestLogger = (logger) => {
   return (req, res, next) => {
     const start = Date.now();
@@ -152,10 +174,16 @@ const requestLogger = (logger) => {
   };
 };
 
-// Fonction pour logger les erreurs non capturées
+/**
+ * Fonction pour logger les erreurs non capturées au niveau du processus
+ */
 const setupGlobalErrorLogging = (logger) => {
   process.on('uncaughtException', (error) => {
-    logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
+    logger.error('Uncaught Exception', { 
+      error: error.message, 
+      stack: error.stack,
+      context: 'Global Error Handler'
+    });
     process.exit(1);
   });
 
@@ -163,30 +191,24 @@ const setupGlobalErrorLogging = (logger) => {
     logger.error('Unhandled Rejection', {
       reason: reason?.message || reason,
       stack: reason?.stack,
-      promise: promise.toString()
+      promise: promise.toString(),
+      context: 'Global Rejection Handler'
     });
   });
 };
 
-// Fonction pour nettoyer les anciens logs (garde les 30 derniers jours)
+/**
+ * Fonction pour nettoyer les anciens logs de MongoDB (garde les 30 derniers jours)
+ */
 const cleanupOldLogs = async () => {
   try {
-    const files = await fs.readdir(LOGS_DIR);
-    const logFiles = files.filter(file => file.endsWith('.log'));
-
-    for (const file of logFiles) {
-      const filePath = path.join(LOGS_DIR, file);
-      const stats = await fs.stat(filePath);
-
-      // Supprimer les fichiers de plus de 30 jours
-      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-      if (stats.mtime.getTime() < thirtyDaysAgo) {
-        await fs.unlink(filePath);
-        console.log(` Ancien log supprimé: ${file}`);
-      }
-    }
+    const thirtyDaysAgo = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000));
+    
+    // Nettoyer les logs généraux
+    const result1 = await Log.deleteMany({ timestamp: { $lt: thirtyDaysAgo } });
+    console.log(`${result1.deletedCount} anciens logs généraux supprimés`);
   } catch (error) {
-    console.error('Erreur lors du nettoyage des logs:', error);
+    console.error('Erreur lors du nettoyage des logs:', error.message);
   }
 };
 
