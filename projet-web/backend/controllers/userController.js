@@ -2,9 +2,9 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Gps = require('../models/Gps');
 const Session = require('../models/Session');
-const Metadata = require('../models/Metadata');
+const Metadata = require('../models/Metadatas');
 const { generateToken, generateRefreshToken } = require('../middleware/auth');
-const { logger } = require('../models/logger');
+const { logger } = require('../models/Logger');
 const { logAuthSuccess, logLogout, logPasswordChange } = require('../middleware/security');
 
 exports.registerUser = async (req, res) => {

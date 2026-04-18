@@ -1,4 +1,4 @@
-const { logger } = require('../models/logger');
+const { logger } = require('../models/Logger');
 
 const securityMiddleware = (req, res, next) => {
   // Amélioration des en-têtes de sécurité
