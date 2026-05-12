@@ -1,4 +1,4 @@
-const { logger } = require('../models/logger');
+const { logger } = require('../models/Logger');
 
 const securityMiddleware = (req, res, next) => {
   // Amélioration des en-têtes de sécurité
@@ -160,7 +160,7 @@ const securityLoggerMiddleware = (req, res, next) => {
     if (suspiciousIPs.includes(clientIP)) {
       logger.security('SUSPICIOUS_IP_ACCESS', {
         req,
-        ip: clientIP
+        ipAddress: clientIP
       });
     }
   }
@@ -174,28 +174,28 @@ const logSecurityEvent = (event, data) => {
 };
 
 const logAuthSuccess = (req, user) => {
-  logger.security('SUCCESSFUL_LOGIN', {
+  logger.security('login', {
     userId: user._id,
     email: user.email,
-    ip: req.ip,
+    ipAddress: req.ip,
     userAgent: req.get('User-Agent'),
     method: req.method,
-    path: req.path
+    endpoint: req.path
   });
 };
 
 const logLogout = (req, userId) => {
-  logger.security('USER_LOGOUT', {
+  logger.security('logout', {
     userId,
-    ip: req.ip,
+    ipAddress: req.ip,
     userAgent: req.get('User-Agent')
   });
 };
 
 const logPasswordChange = (req, userId) => {
-  logger.security('PASSWORD_CHANGED', {
+  logger.security('password_change', {
     userId,
-    ip: req.ip,
+    ipAddress: req.ip,
     userAgent: req.get('User-Agent')
   });
 };

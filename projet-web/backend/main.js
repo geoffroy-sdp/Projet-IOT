@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const { connectDatabase } = require('./config/database');
-const { logger, requestLogger, setupGlobalErrorLogging, cleanupOldLogs } = require('./models/logger');
+const { connectDatabase, ErrorLog, SecurityLog, RequestLog, Log } = require('./config/database');
+const { logger, requestLogger, setupGlobalErrorLogging, cleanupOldLogs } = require('./models/Logger');
 const { securityMiddleware, corsMiddleware, rateLimitMiddleware, securityLoggerMiddleware } = require('./middleware/security');
 const userRoutes = require('./routes/users');
 const adminRoutes = require('./routes/admin');
@@ -39,53 +39,57 @@ app.use('/api/admin', adminRoutes);
 app.get('/api/logs/:type', async (req, res) => {
   try {
     const { type } = req.params;
-    const allowedTypes = ['error', 'requests', 'security', 'combined', 'debug'];
+    const { limit = 100 } = req.query;
+    const allowedTypes = ['error', 'requests', 'security', 'info', 'debug'];
 
     if (!allowedTypes.includes(type)) {
       return res.status(400).json({
         success: false,
-        message: 'Type de log invalide. Types autorisés: error, requests, security, combined, debug'
+        message: 'Type de log invalide. Types autorisés: error, requests, security, info, debug'
       });
     }
 
     // Vérifier la clé admin pour accéder aux logs
     const adminKey = req.headers['x-admin-key'];
     if (adminKey !== process.env.ADMIN_KEY) {
-      logger.security('UNAUTHORIZED_LOG_ACCESS', { req, type });
+      logger.security('UNAUTHORIZED_LOG_ACCESS', { 
+        req, 
+        type,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
       return res.status(403).json({
         success: false,
         message: 'Accès non autorisé aux logs'
       });
     }
 
-    const fs = require('fs').promises;
-    const path = require('path');
-    const logFile = path.join(__dirname, 'logs', `${type}.log`);
-
-    try {
-      const logContent = await fs.readFile(logFile, 'utf8');
-      const lines = logContent.trim().split('\n').slice(-100); // Dernières 100 lignes
-
-      res.status(200).json({
-        success: true,
-        data: {
-          type,
-          lines: lines.length,
-          logs: lines.map(line => {
-            try {
-              return JSON.parse(line);
-            } catch {
-              return { raw: line };
-            }
-          })
-        }
-      });
-    } catch (fileError) {
-      res.status(404).json({
-        success: false,
-        message: `Fichier de log ${type}.log non trouvé`
-      });
+    // Récupérer les logs depuis MongoDB selon le type
+    let logs = [];
+    switch(type) {
+      case 'error':
+        logs = await ErrorLog.find().sort({ timestamp: -1 }).limit(parseInt(limit));
+        break;
+      case 'requests':
+        logs = await RequestLog.find().sort({ timestamp: -1 }).limit(parseInt(limit));
+        break;
+      case 'security':
+        logs = await SecurityLog.find().sort({ timestamp: -1 }).limit(parseInt(limit));
+        break;
+      case 'info':
+      case 'debug':
+        logs = await Log.find({ level: type }).sort({ timestamp: -1 }).limit(parseInt(limit));
+        break;
     }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        type,
+        count: logs.length,
+        logs
+      }
+    });
   } catch (error) {
     logger.error('Erreur lors de la lecture des logs', { error: error.message });
     res.status(500).json({
@@ -122,8 +126,7 @@ app.use((error, req, res, next) => {
 connectDatabase().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log(`Logging system initialized`);
-    console.log(`Logs available at: /logs/{error|requests|security|combined|debug}`);
+    console.log(`Logging system initialized with MongoDB`);
   });
 }).catch(error => {
   logger.error('Failed to connect database', { error: error.message });

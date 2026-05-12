@@ -1,8 +1,8 @@
-const { logger } = require('./models/logger');
-const { logSecurityEvent } = require('./middleware/security');
+const { logger } = require('./models/Logger');
+const { logSecurityEvent } = require('./config/database');
 
 async function testLoggingSystem() {
-  console.log(' Test du système de logging...\n');
+  console.log('Test du système de logging MongoDB...\n');
 
   // Test des différents types de logs
   await logger.error('Test error logging', {
@@ -31,13 +31,16 @@ async function testLoggingSystem() {
   });
 
   // Test de l'événement de sécurité personnalisé
-  logSecurityEvent('CUSTOM_TEST_EVENT', {
-    test: true,
-    customData: 'Additional security test data'
+  await logSecurityEvent({
+    eventType: 'suspicious_activity',
+    severity: 'medium',
+    description: 'Custom test security event',
+    ipAddress: '127.0.0.1',
+    additionalData: { test: true, customData: 'Additional security test data' }
   });
 
-  console.log(' Tests de logging terminés !');
-  console.log(' Vérifiez les fichiers dans le dossier logs/');
+  console.log('Tests de logging terminés !');
+  console.log(' Les logs sont maintenant sauvegardés dans MongoDB');
 }
 
 // Exécuter le test si appelé directement
