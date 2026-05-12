@@ -3,13 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { button } from './class/itemsbutton.class';
 import { AppComponent } from './component/AppsComponent/apps-component';
 import { AppBluetooth } from './component/app-bluetooth/app-bluetooth';
+import { AppForgotPassword } from './component/app-forgot-password/app-forgot-password';
 import { AppHome } from './component/app-home/app-home';
+import { AppLogin } from './component/app-login/app-login';
 import { AppMap } from './component/app-map/app-map';
 import { AppMusic } from './component/app-music/app-music';
 import { AppSetting } from './component/app-setting/app-setting';
-import { AppLogin } from './component/app-login/app-login';
 import { AppSignup } from './component/app-signup/app-signup';
-import { AppForgotPassword } from './component/app-forgot-password/app-forgot-password';
 
 @Component({
   selector: 'app-root',
@@ -111,5 +111,9 @@ export class App implements OnInit {
 
   onHomeClick() {
     this.currentPage = 'home';
+  }
+
+  onHomeNavigation(page: string) {
+    this.currentPage = page;
   }
 }

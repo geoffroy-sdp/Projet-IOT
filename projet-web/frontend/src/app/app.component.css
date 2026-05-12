@@ -78,3 +78,153 @@
  
 }
 
+
+/* ============================================
+   TABLETTES ET PETITS DESKTOP (768px - 1024px)
+   ============================================ */
+
+@media screen and (max-width: 1024px) {
+  #button-panel {
+    height: 100%;
+    width: auto; 
+    display: flex;
+    flex-direction: column;
+    background-color: var(--component-bg);
+    border-right: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+}
+
+/* ============================================
+   TÉLÉPHONES EN MODE PAYSAGE (480px - 768px)
+   ============================================ */
+
+@media screen and (max-width: 768px) {
+  #button-panel {
+    height: 110px;
+    width: auto; 
+    display: flex;
+    flex-direction: row;
+    background-color: var(--component-bg);
+    border-right: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+  #main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  width: 100%;
+}
+#groupe_buttons {
+  margin: auto;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+.buttons {
+  margin: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  font-size: 16px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+  
+}
+/* ============================================
+   TÉLÉPHONES EN MODE PORTRAIT (jusqu'à 480px)
+   ============================================ */
+
+@media screen and (max-width: 480px) {
+  #button-panel {
+    height: 105px;
+    width: auto; 
+    display: flex;
+    flex-direction: row;
+    background-color: var(--component-bg);
+    border-right: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+  #main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  width: 100%;
+}
+#groupe_buttons {
+  margin: auto;
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+}
+.buttons {
+  margin: 5px;
+  padding: 6px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  font-size: 16px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+}
+/* ============================================
+   PETITS TÉLÉPHONES (320px - 360px)
+   ============================================ */
+
+@media screen and (max-width: 360px) {
+  #button-panel {
+    height: 100px;
+    width: auto; 
+    display: flex;
+    flex-direction: row;
+    background-color: var(--component-bg);
+    border-right: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+  #main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  width: 100%;
+}
+#groupe_buttons {
+  margin: auto;
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+}
+.buttons {
+  margin: 3px;
+  padding: 4px 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  font-size: 16px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+}

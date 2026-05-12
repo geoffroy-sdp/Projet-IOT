@@ -1,0 +1,450 @@
+.home-container {
+  width: 100%;
+  height: 100%;
+  padding: 30px;
+  box-sizing: border-box;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  overflow-y: auto;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ============================================
+   SECTION HEURE ET DATE
+   ============================================ */
+
+.datetime-section {
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.time-display {
+  font-size: 72px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  color: var(--text-color);
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.date-display {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: var(--text-color);
+  opacity: 0.85;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   GRILLE DE WIDGETS - DESKTOP (15-17")
+   ============================================ */
+
+.widgets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  flex: 1;
+}
+
+/* ============================================
+   WIDGET DE BASE
+   ============================================ */
+
+.widget {
+  background-color: var(--component-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 25px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  -webkit-user-select: none;
+  user-select: none;
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.widget:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px var(--shadow-color);
+  border-color: var(--text-color);
+}
+
+.widget:active {
+  transform: translateY(-2px);
+}
+
+.widget-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  color: var(--text-color);
+}
+
+.widget:hover .widget-icon {
+  transform: scale(1.1);
+}
+
+/* ============================================
+   CONTENU DU WIDGET
+   ============================================ */
+
+.widget-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.widget-content h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--text-color);
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+.widget-value {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.widget-values {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.value-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.value-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--text-color);
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
+.value-item .widget-value {
+  font-size: 24px;
+  margin: 0;
+}
+
+.widget-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+.widget:hover .widget-arrow {
+  opacity: 1;
+  transform: translateX(4px);
+  background-color: var(--hover-bg);
+}
+
+.widget-arrow svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ============================================
+   MODE SOMBRE - AJUSTEMENTS SUPPLÉMENTAIRES
+   ============================================ */
+
+html.dark-mode .widget {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .widget:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   SCROLLBAR PERSONNALISÉE
+   ============================================ */
+
+.home-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.home-container::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.home-container::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.home-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-color);
+  opacity: 0.6;
+}
+
+/* ============================================
+   ANIMATION D'APPARITION EN CASCADE
+   ============================================ */
+
+.widget {
+  animation: slideInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.widget:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.widget:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.widget:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.widget:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+/* ============================================
+   TABLETTES (1024px - 768px)
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .home-container {
+    padding: 25px;
+    gap: 35px;
+  }
+
+  .time-display {
+    font-size: 60px;
+  }
+
+  .date-display {
+    font-size: 18px;
+  }
+
+  .widgets-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  .widget {
+    padding: 22px;
+    gap: 18px;
+  }
+
+  .widget-value {
+    font-size: 26px;
+  }
+}
+
+/* ============================================
+   TÉLÉPHONES EN MODE PAYSAGE (768px - 480px)
+   ============================================ */
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 20px;
+    gap: 30px;
+  }
+
+  .time-display {
+    font-size: 48px;
+  }
+
+  .date-display {
+    font-size: 16px;
+  }
+
+  .widgets-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .widget {
+    padding: 20px;
+    gap: 15px;
+    border-radius: 18px;
+  }
+
+  .widget-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .widget-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .widget-content h3 {
+    font-size: 12px;
+  }
+
+  .widget-value {
+    font-size: 22px;
+  }
+
+  .widget-arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ============================================
+   TÉLÉPHONES EN MODE PORTRAIT (jusqu'à 480px)
+   ============================================ */
+
+@media (max-width: 480px) {
+  .home-container {
+    padding: 15px;
+    gap: 25px;
+  }
+
+  .time-display {
+    font-size: 36px;
+    letter-spacing: 1px;
+  }
+
+  .date-display {
+    font-size: 13px;
+  }
+
+  .widgets-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .widget {
+    padding: 15px;
+    gap: 12px;
+    border-radius: 16px;
+  }
+
+  .widget-icon {
+    width: 45px;
+    height: 45px;
+  }
+
+  .widget-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .widget-content h3 {
+    font-size: 11px;
+  }
+
+  .widget-value {
+    font-size: 18px;
+  }
+
+  .widget-arrow {
+    width: 28px;
+    height: 28px;
+  }
+
+  .widget-arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* ============================================
+   SCROLLBAR PERSONNALISÉE
+   ============================================ */
+
+.home-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.home-container::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.home-container::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.home-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-color);
+  opacity: 0.6;
+}
+
+/* ============================================
+   ANIMATION D'APPARITION EN CASCADE
+   ============================================ */
+
+.widget {
+  animation: slideInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.widget:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.widget:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.widget:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.widget:nth-child(4) {
+  animation-delay: 0.4s;
+}

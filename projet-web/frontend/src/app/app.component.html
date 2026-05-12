@@ -22,7 +22,7 @@
 
   <div id='app-panel'>
     <div class="apps">
-      <app-app-home *ngIf="currentPage === 'home'"></app-app-home>
+      <app-app-home *ngIf="currentPage === 'home'" (navigationClick)="onHomeNavigation($event)"></app-app-home>
       <app-app-map *ngIf="currentPage === 'map'"></app-app-map>
       <app-app-music *ngIf="currentPage === 'music'"></app-app-music>
       <app-app-bluetooth *ngIf="currentPage === 'bluetooth'"></app-app-bluetooth>

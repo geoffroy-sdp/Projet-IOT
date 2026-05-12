@@ -1,1 +1,73 @@
-<p>app-home works!</p>
+<div class="home-container">
+  <!-- Section Heure et Date -->
+  <div class="datetime-section">
+    <div class="time-display">{{ currentTime }}</div>
+    <div class="date-display">{{ currentDate }}</div>
+  </div>
+
+  <!-- Section des Widgets -->
+  <div class="widgets-grid">
+    <!-- Widget Musique -->
+    <div class="widget" (click)="goToMusic()">
+      <div class="widget-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
+          <path d="m21.32 6.05-12-4A1.01 1.01 0 0 0 8 3v7.56c-.59-.34-1.27-.56-2-.56-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V4.39l10 3.33v6.84c-.59-.34-1.27-.56-2-.56-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7c0-.43-.28-.81-.68-.95M6 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m12 4c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2"/>
+        </svg>
+      </div>
+      <div class="widget-content">
+        <h3>Temps d'écoute</h3>
+        <p class="widget-value">{{ musicListeningTime }}</p>
+      </div>
+      <div class="widget-arrow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8.59 16.59L10 18l8-8-8-8-1.41 1.41L14.17 9H6v2h8.17z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Widget Trajets (fusionné) -->
+    <div class="widget" (click)="goToMap()">
+      <div class="widget-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
+          <path d="m21.51 6.14-5-3a.99.99 0 0 0-.87-.08L8.09 5.89 3.51 3.14a.99.99 0 0 0-1.01-.01c-.31.18-.51.51-.51.87v13c0 .35.18.68.49.86l5 3c.26.16.58.19.87.08l7.55-2.83 4.59 2.75c.16.1.34.14.51.14s.34-.04.49-.13c.31-.18.51-.51.51-.87V7a.99.99 0 0 0-.49-.86M7 18.23l-3-1.8V5.77l3 1.8v10.67Zm8-1.93-6 2.25V7.69l6-2.25zm5 1.93-3-1.8V5.77l3 1.8v10.67Z"/>
+        </svg>
+      </div>
+      <div class="widget-content">
+        <h3>Trajets</h3>
+        <div class="widget-values">
+          <div class="value-item">
+            <span class="value-label">Durée</span>
+            <p class="widget-value">{{ tripDuration }}</p>
+          </div>
+          <div class="value-item">
+            <span class="value-label">Nombre</span>
+            <p class="widget-value">{{ tripCount }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="widget-arrow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8.59 16.59L10 18l8-8-8-8-1.41 1.41L14.17 9H6v2h8.17z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Widget Appareil Connecté -->
+    <div class="widget" (click)="goToBluetooth()">
+      <div class="widget-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
+        </svg>
+      </div>
+      <div class="widget-content">
+        <h3>Dernier appareil</h3>
+        <p class="widget-value">{{ lastDevice }}</p>
+      </div>
+      <div class="widget-arrow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8.59 16.59L10 18l8-8-8-8-1.41 1.41L14.17 9H6v2h8.17z"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
