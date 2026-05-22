@@ -7,6 +7,7 @@ const User = require('./models/User');
 const Gps = require('./models/Gps');
 const Session = require('./models/Session');
 const Metadata = require('./models/Metadata');
+const Bluetooth = require('./models/Bluetooth');
 const { connectDatabase, disconnectDatabase } = require('./config/database');
 
 const seedDatabase = async () => {
@@ -19,6 +20,7 @@ const seedDatabase = async () => {
     await Gps.deleteMany();
     await Session.deleteMany();
     await Metadata.deleteMany();
+    await Bluetooth.deleteMany();
     console.log('Cleared existing data');
 
     // Create fake users
@@ -81,6 +83,39 @@ const seedDatabase = async () => {
       console.log(`User created: ${user.username}`);
     }
 
+    // données Bluetooth par utilisateur
+    const bluetoothDevices = [
+      [
+        { deviceName: 'iPhone 15 Pro', macAddress: 'A1:B2:C3:D4:E5:F6', deviceType: 'phone' },
+        { deviceName: 'AirPods Pro',   macAddress: 'B2:C3:D4:E5:F6:A1', deviceType: 'headset' },
+      ],
+      [
+        { deviceName: 'Samsung Galaxy S24', macAddress: 'C3:D4:E5:F6:A1:B2', deviceType: 'phone' },
+        { deviceName: 'Galaxy Buds',        macAddress: 'D4:E5:F6:A1:B2:C3', deviceType: 'headset' },
+      ],
+      [
+        { deviceName: 'iPhone 14',    macAddress: 'E5:F6:A1:B2:C3:D4', deviceType: 'phone' },
+        { deviceName: 'Beats Studio', macAddress: 'F6:A1:B2:C3:D4:E5', deviceType: 'headset' },
+      ],
+    ];
+
+    for (let userIndex = 0; userIndex < users.length - 1; userIndex++) {
+      const user = users[userIndex];
+      const devices = bluetoothDevices[userIndex];
+
+      for (let i = 0; i < devices.length; i++) {
+        const device = new Bluetooth({
+          userId: user._id,
+          deviceName: devices[i].deviceName,
+          macAddress: devices[i].macAddress,
+          deviceType: devices[i].deviceType,
+          connectedAt: new Date(Date.now() - i * 86400000), // décalé d'1 jour par appareil
+        });
+        await device.save();
+        console.log(`Bluetooth device created for ${user.username}: ${devices[i].deviceName}`);
+      }
+    }
+
     // GPS coordinates for different locations
     const gpsLocations = [
       { latitude: 48.8566, longitude: 2.3522, city: 'Paris', address: 'Eiffel Tower, Paris' },
@@ -95,7 +130,7 @@ const seedDatabase = async () => {
       { latitude: 48.2082, longitude: 16.3738, city: 'Vienna', address: 'St. Stephen\'s Cathedral, Vienna' },
     ];
 
-    // Create GPS data for each user (3 locations per user)
+    // Create GPS data for each user
     for (let userIndex = 0; userIndex < users.length - 1; userIndex++) {
       const user = users[userIndex];
       for (let i = 0; i < 3; i++) {
@@ -121,7 +156,7 @@ const seedDatabase = async () => {
             country: 'France',
             fullAddress: location.address,
           },
-          timestamp: new Date(Date.now() - (i + 1) * 86400000), // Last 3 days
+          timestamp: new Date(Date.now() - (i + 1) * 86400000),
           source: 'gps',
           provider: 'GPS',
           signalQuality: ['excellent', 'good', 'fair'][Math.floor(Math.random() * 3)],
@@ -132,13 +167,12 @@ const seedDatabase = async () => {
       }
     }
 
-    // Create sessions for each user (2 sessions per user)
+    // Create sessions for each user
     for (let userIndex = 0; userIndex < users.length - 1; userIndex++) {
       const user = users[userIndex];
       for (let i = 0; i < 2; i++) {
         const startTime = new Date(Date.now() - (i + 1) * 86400000);
-        const endTime = new Date(startTime.getTime() + 3600000); // 1 hour session
-
+        const endTime = new Date(startTime.getTime() + 3600000);
         const session = new Session({
           userId: user._id,
           sessionId: uuidv4(),
@@ -155,20 +189,16 @@ const seedDatabase = async () => {
             longitude: 2.3522 + Math.random() * 0.5,
             address: 'Paris Region',
           },
-          carPlayData: {
-            isConnected: true,
-          },
+          carPlayData: { isConnected: true },
           musicData: {
-            tracks: [
-              {
-                trackName: 'Song ' + (i + 1),
-                artistName: 'Artist Name',
-                albumName: 'Album Name',
-                duration: 180,
-                playedAt: startTime,
-                playedDuration: 180,
-              },
-            ],
+            tracks: [{
+              trackName: 'Song ' + (i + 1),
+              artistName: 'Artist Name',
+              albumName: 'Album Name',
+              duration: 180,
+              playedAt: startTime,
+              playedDuration: 180,
+            }],
             totalTracksPlayed: 1,
           },
           navigationData: {
@@ -199,26 +229,10 @@ const seedDatabase = async () => {
           duration: 240,
         },
         musicHistory: [
-          {
-            trackName: 'Track 1',
-            artistName: 'Artist 1',
-            albumName: 'Album 1',
-            playedAt: new Date(Date.now() - 86400000),
-            duration: 240,
-          },
-          {
-            trackName: 'Track 2',
-            artistName: 'Artist 2',
-            albumName: 'Album 2',
-            playedAt: new Date(Date.now() - 172800000),
-            duration: 220,
-          },
+          { trackName: 'Track 1', artistName: 'Artist 1', albumName: 'Album 1', playedAt: new Date(Date.now() - 86400000), duration: 240 },
+          { trackName: 'Track 2', artistName: 'Artist 2', albumName: 'Album 2', playedAt: new Date(Date.now() - 172800000), duration: 220 },
         ],
-        lastLocation: {
-          latitude: 48.8566,
-          longitude: 2.3522,
-          timestamp: new Date(),
-        },
+        lastLocation: { latitude: 48.8566, longitude: 2.3522, timestamp: new Date() },
         lastConnectionTime: new Date(),
         lastSessionDuration: 3600,
         stats: {
@@ -228,13 +242,11 @@ const seedDatabase = async () => {
           averageSessionDuration: 3600,
         },
         carPlayInfo: {
-          connectedDevices: [
-            {
-              deviceName: 'iPhone 13',
-              deviceType: 'iPhone',
-              lastConnectedAt: new Date(),
-            },
-          ],
+          connectedDevices: [{
+            deviceName: 'iPhone 13',
+            deviceType: 'iPhone',
+            lastConnectedAt: new Date(),
+          }],
         },
         lastActivityType: 'music',
         lastActivityTime: new Date(),
@@ -248,15 +260,16 @@ const seedDatabase = async () => {
     console.log('\n✅ Database seeded successfully!');
     console.log('\nSeed Summary:');
     console.log(`- Users created: ${users.length}`);
-    console.log(`- GPS points created: ${users.length - 1} users × 3 points = ${(users.length - 1) * 3} points`);
-    console.log(`- Sessions created: ${users.length - 1} users × 2 sessions = ${(users.length - 1) * 2} sessions`);
-    console.log(`- Metadata records: ${users.length - 1} records`);
+    console.log(`- GPS points: ${(users.length - 1) * 3}`);
+    console.log(`- Sessions: ${(users.length - 1) * 2}`);
+    console.log(`- Metadata records: ${users.length - 1}`);
+    console.log(`- Bluetooth devices: ${(users.length - 1) * 2}`);
     console.log('\nTest Credentials:');
     console.log('User 1: jean.dupont@example.com / Password123!');
     console.log('User 2: marie.martin@example.com / Password123!');
     console.log('User 3: pierre.bernard@example.com / Password123!');
     console.log('Admin: admin@example.com / AdminPassword123!');
-    console.log('\nAdmin Key to use in headers: x-admin-key = ' + (process.env.ADMIN_KEY || 'admin-secret-key'));
+    console.log('\nAdmin Key: x-admin-key = ' + (process.env.ADMIN_KEY || 'admin-secret-key'));
 
     await disconnectDatabase();
   } catch (error) {
@@ -266,7 +279,6 @@ const seedDatabase = async () => {
   }
 };
 
-// Run seed
 if (require.main === module) {
   seedDatabase();
 }
