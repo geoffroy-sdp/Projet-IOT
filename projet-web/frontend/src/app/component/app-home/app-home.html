@@ -15,8 +15,8 @@
         </svg>
       </div>
       <div class="widget-content">
-        <h3>Temps d'écoute</h3>
-        <p class="widget-value">{{ musicListeningTime }}</p>
+        <h3>Dernier song</h3>
+        <p class="widget-value">{{ l?.track_name || 'Aucune chanson' }}</p>
       </div>
       <div class="widget-arrow">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <!-- Widget Trajets (fusionné) -->
+    <!-- Widget last destination-->
     <div class="widget" (click)="goToMap()">
       <div class="widget-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
@@ -33,15 +33,10 @@
         </svg>
       </div>
       <div class="widget-content">
-        <h3>Trajets</h3>
+        <h3>last destination</h3>
         <div class="widget-values">
           <div class="value-item">
-            <span class="value-label">Durée</span>
-            <p class="widget-value">{{ tripDuration }}</p>
-          </div>
-          <div class="value-item">
-            <span class="value-label">Nombre</span>
-            <p class="widget-value">{{ tripCount }}</p>
+            <p class="widget-value">{{ derniereDestination }}</p>
           </div>
         </div>
       </div>

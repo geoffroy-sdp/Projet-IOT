@@ -1,4 +1,76 @@
-<div id ="app-map-container">
+<div id="app-map-container">
   <div id="map"></div>
-  <div id="historique">historique</div>
+
+  <div id="historique">
+    <div class="historique-titre">Historique GPS</div>
+
+    <div *ngIf="chargement" style="opacity:0.6; font-size:13px;">
+      Chargement...
+    </div>
+    <div *ngIf="erreur" style="color:#ef4444; font-size:12px;">
+      {{ erreur }}
+    </div>  
+
+    <!-- Carte départ + arrivée ensemble -->
+    <div class="trajet-card"
+         *ngIf="!chargement && points.length >= 2"
+         (click)="centrerSurPoint(points[0])">
+
+      <div class="trajet-header">
+        <span class="trajet-numero">Trajet</span>
+        {{ points[0].timestamp | date:'dd/MM/yyyy' }}
+      </div>
+
+      <div class="point-ligne">
+
+        <!-- Départ -->
+        <div class="point-item">
+          <div class="point-dot dot-depart"></div>
+          <div class="point-info">
+            <div class="point-label">Départ</div>
+            <div *ngIf="points[0].adresse; else coordsDepart">
+              {{ points[0].adresse }}
+            </div>
+            <ng-template #coordsDepart>
+              <span style="opacity:0.5;">Chargement...</span>
+            </ng-template>
+            <div style="opacity:0.5; font-size:11px;">
+              {{ points[0].timestamp | date:'HH:mm' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="separateur"></div>
+
+        <!-- Arrivée -->
+        <div class="point-item">
+          <div class="point-dot dot-arrivee"></div>
+          <div class="point-info">
+            <div class="point-label">Arrivée</div>
+            <div *ngIf="points[points.length-1].adresse; else coordsArrivee">
+              {{ points[points.length-1].adresse }}
+            </div>
+            <ng-template #coordsArrivee>
+              <span style="opacity:0.5;">Chargement...</span>
+            </ng-template>
+            <div style="opacity:0.5; font-size:11px;">
+              {{ points[points.length-1].timestamp | date:'HH:mm' }}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Badges -->
+      <div class="meta-info">
+        <span class="meta-badge">{{ points.length }} points</span>
+        <span class="meta-badge" *ngIf="points[0].speed">
+          {{ points[0].speed }} km/h
+        </span>
+        <span class="meta-badge">{{ points[0].signalQuality }}</span>
+      </div>
+
+    </div>
+
+  </div>
 </div>

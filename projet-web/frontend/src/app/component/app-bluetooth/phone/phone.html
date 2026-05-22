@@ -1,10 +1,14 @@
-<div class='app'>
-  <div class="image">
-    <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
-    fill="currentColor" viewBox="0 0 24 24" >
-    <!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
-    <path d="M7 22h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2M7 4h10v16H7z"></path><path d="M12 17a1 1 0 1 0 0 2 1 1 0 1 0 0-2"></path>
+<div class="phone-card">
+  <div class="phone-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+      fill="currentColor" viewBox="0 0 24 24">
+      <path d="M7 22h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2M7 4h10v16H7z"/>
+      <path d="M12 17a1 1 0 1 0 0 2 1 1 0 1 0 0-2"/>
     </svg>
   </div>
-  <p>nom du phone<br>date de connexion<br>address mac</p> <!-- la faut modifier-->
+  <div class="phone-info">
+    <span class="phone-name">{{ deviceName }}</span>
+    <span class="phone-date">{{ connectedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+    <span class="phone-mac">{{ macAddress }}</span>
+  </div>
 </div>

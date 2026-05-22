@@ -27,7 +27,19 @@ export class App implements OnInit {
   authPage: 'login' | 'signup' | 'forgot-password' = 'login';
 
   ngOnInit() {
+    this.loadDarkMode();
     this.checkAuthentication();
+  }
+
+  loadDarkMode() {
+    // Charger le mode sombre sauvegardé
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode) {
+      const isDarkMode = JSON.parse(savedDarkMode);
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark-mode');
+      }
+    }
   }
 
   deleteLocalStorage() {
@@ -35,7 +47,7 @@ export class App implements OnInit {
   }
 
   checkAuthentication() {
-    //this.deleteLocalStorage();
+    this.deleteLocalStorage();
     const loggedIn = localStorage.getItem('isLoggedIn');
     this.isLoggedIn = loggedIn === 'true';
     

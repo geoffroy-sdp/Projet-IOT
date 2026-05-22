@@ -1,1 +1,73 @@
-<p>app-music works!</p>
+<div class="music-dashboard">
+
+  <!-- ── Header ─────────────────────────────────────── -->
+  <header class="dashboard-header">
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
+          <path d="m21.32 6.05-12-4A1.01 1.01 0 0 0 8 3v7.56c-.59-.34-1.27-.56-2-.56-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V4.39l10 3.33v6.84c-.59-.34-1.27-.56-2-.56-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7c0-.43-.28-.81-.68-.95M6 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m12 4c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2"/>
+        </svg>
+    <h1>ListenBrainz</h1>
+  </header>
+
+  <div class="widgets-grid">
+
+    <!-- ── Widget : Écoutes récentes ──────────────────── -->
+    <section class="widget">
+      <h2 class="widget-title">Dernières écoutes</h2>
+
+      <p *ngIf="errorListens" class="error">{{ errorListens }}</p>
+
+      <p *ngIf="!errorListens && listens.length === 0" class="empty">
+        Chargement…
+      </p>
+
+      <ul *ngIf="!errorListens && listens.length > 0"
+          class="listen-list">
+        <li *ngFor="let l of listens; trackBy: trackByTs"
+            class="listen-item">
+          <div class="listen-track">{{ l.track_name }}</div>
+          <div class="listen-meta">
+            <span class="artist">{{ l.artist_name }}</span>
+            <span class="sep"> — </span>
+            <span class="album">{{ l.release_name }}</span>
+          </div>
+          <div class="listen-time">
+            {{ l.listened_at * 1000 | date:'dd/MM/yy HH:mm' }}
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ── Widget : Top artistes du mois ──────────────── -->
+    <section class="widget">
+      <h2 class="widget-title">Top artistes — mois</h2>
+
+      <p *ngIf="errorArtists" class="error">{{ errorArtists }}</p>
+
+      <p *ngIf="!errorArtists && topArtists.length === 0" class="empty">
+        Chargement…
+      </p>
+
+      <ol *ngIf="!errorArtists && topArtists.length > 0"
+          class="artist-list">
+        <li *ngFor="let a of topArtists; let i = index; trackBy: trackByMbid"
+            class="artist-item">
+
+          <!-- Barre de progression relative au #1 -->
+          <div class="bar-track">
+            <div class="bar-fill"
+                 [style.width.%]="barWidth(a.listen_count)">
+            </div>
+          </div>
+
+          <div class="artist-content">
+            <span class="rank">#{{ i + 1 }}</span>
+            <span class="artist-name">{{ a.artist_name }}</span>
+            <span class="count">{{ a.listen_count }}</span>
+          </div>
+
+        </li>
+      </ol>
+    </section>
+
+  </div>
+</div>

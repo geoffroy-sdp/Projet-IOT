@@ -7,33 +7,29 @@ const { logger, requestLogger, setupGlobalErrorLogging, cleanupOldLogs } = requi
 const { securityMiddleware, corsMiddleware, rateLimitMiddleware, securityLoggerMiddleware } = require('./middleware/security');
 const userRoutes = require('./routes/users');
 const adminRoutes = require('./routes/admin');
+const bluetoothRoutes = require('./routes/bluetooth'); // ← AJOUT
 
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-// Initialiser le système de logging
 setupGlobalErrorLogging(logger);
-
-// Nettoyer les anciens logs au démarrage
 cleanupOldLogs();
 
-// Middlewares de sécurité et logging
 app.use(securityMiddleware);
 app.use(corsMiddleware);
 app.use(rateLimitMiddleware);
 app.use(securityLoggerMiddleware);
 
-// Middlewares de base
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware de logging des requêtes
 app.use(requestLogger(logger));
 
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/bluetooth', bluetoothRoutes); // ← AJOUT
 
 // Routes de logging (protégées)
 app.get('/api/logs/:type', async (req, res) => {
@@ -49,11 +45,10 @@ app.get('/api/logs/:type', async (req, res) => {
       });
     }
 
-    // Vérifier la clé admin pour accéder aux logs
     const adminKey = req.headers['x-admin-key'];
     if (adminKey !== process.env.ADMIN_KEY) {
-      logger.security('UNAUTHORIZED_LOG_ACCESS', { 
-        req, 
+      logger.security('UNAUTHORIZED_LOG_ACCESS', {
+        req,
         type,
         ipAddress: req.ip,
         userAgent: req.get('User-Agent')
@@ -64,7 +59,6 @@ app.get('/api/logs/:type', async (req, res) => {
       });
     }
 
-    // Récupérer les logs depuis MongoDB selon le type
     let logs = [];
     switch(type) {
       case 'error':
@@ -84,11 +78,7 @@ app.get('/api/logs/:type', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: {
-        type,
-        count: logs.length,
-        logs
-      }
+      data: { type, count: logs.length, logs }
     });
   } catch (error) {
     logger.error('Erreur lors de la lecture des logs', { error: error.message });
@@ -116,7 +106,6 @@ app.use((error, req, res, next) => {
     url: req.url,
     method: req.method
   });
-
   res.status(500).json({
     success: false,
     message: 'Erreur interne du serveur'

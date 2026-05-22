@@ -25,19 +25,131 @@
   width: 25%;
   height: 95%;
   background-color: var(--component-bg);
-  border-left: 1px solid var(--border-color);
-  overflow-y: auto;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   display: flex;
+  flex-direction: column;
   padding: 25px;
-  margin-left: 0px;
   position: relative;
   border-radius: 40px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 32px var(--shadow-color);
   transition: all 0.3s ease;
   flex-shrink: 0;
+}
+
+#historique::-webkit-scrollbar {
+  display: none;
+}
+
+/* Titre */
+.historique-titre {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: var(--text-color);
+  flex-shrink: 0;
+}
+
+/* Carte trajet */
+.trajet-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.trajet-card:hover {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.trajet-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.trajet-numero {
+  background: rgba(59, 130, 246, 0.25);
+  color: #3b82f6;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+/* Points départ/arrivée */
+.point-ligne {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.point-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.point-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.dot-depart  { background: #000000; }
+.dot-arrivee { background: #000000; }
+
+.point-info {
+  color: var(--text-color);
+  opacity: 0.85;
+  line-height: 1.4;
+}
+
+.point-label {
+  font-weight: 600;
+  font-size: 11px;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.separateur {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  margin-left: 4px;
+}
+
+/* Badges métadonnées */
+.meta-info {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.meta-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 11px;
+  opacity: 0.75;
 }
 
 /* ============================================
@@ -79,12 +191,10 @@
   #historique {
     width: 95%;
     height: 40%;
-    border-top: 1px solid var(--border-color);
     padding: 15px;
     margin-top: 5px;
     border-radius: 25px;
     font-size: 13px;
-    overflow-y: auto;
   }
 }
 
@@ -109,11 +219,9 @@
   #historique {
     width: 95%;
     height: 50%;
-    border-top: 1px solid var(--border-color);
     padding: 8px;
     border-radius: 20px;
     font-size: 12px;
-    overflow-y: auto;
     max-height: calc(100vh - 300px);
   }
 }

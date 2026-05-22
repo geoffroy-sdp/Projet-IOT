@@ -1,10 +1,18 @@
-<div id="bluetooth-contrainer">
-  <h2>Bluetooth historique</h2>
+<div id="bluetooth-container">
+  <div class="bluetooth-titre">Bluetooth historique</div>
 
   <div class="bluetooth-content">
-    <app-phone></app-phone>
-    <app-phone></app-phone>
-    <app-phone></app-phone>
-    <app-phone></app-phone>
+    <div *ngIf="chargement" class="empty-state">Chargement...</div>
+
+    <div *ngIf="!chargement && appareils.length === 0" class="empty-state">
+      Aucun appareil enregistré
+    </div>
+
+    <app-phone
+      *ngFor="let appareil of appareils"
+      [deviceName]="appareil.deviceName"
+      [macAddress]="appareil.macAddress"
+      [connectedAt]="appareil.connectedAt">
+    </app-phone>
   </div>
 </div>
