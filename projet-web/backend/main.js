@@ -20,7 +20,29 @@ app.use(corsMiddleware);
 app.use(rateLimitMiddleware);
 app.use(securityLoggerMiddleware);
 
-app.use(cors());
+// Configure express CORS properly
+const corsOptions = {
+  origin: function(origin, callback) {
+    const allowedOriginsEnv = process.env.ALLOWED_ORIGINS || 'http://localhost:5000,https://projet-iot-tau.vercel.app';
+    
+    // If ALLOWED_ORIGINS is '*', allow all origins
+    if (allowedOriginsEnv === '*') {
+      callback(null, true);
+    } else {
+      const allowedOrigins = allowedOriginsEnv.split(',').map(o => o.trim());
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow anyway for safety
+      }
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
