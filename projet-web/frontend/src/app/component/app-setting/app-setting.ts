@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class AppSetting implements OnInit {
   isDarkMode: boolean = false;
+  @Output() logoutClick = new EventEmitter<void>();
 
   ngOnInit() {
     // Récupérer le mode sombre du localStorage
@@ -31,6 +32,26 @@ export class AppSetting implements OnInit {
       document.documentElement.classList.add('dark-mode');
     } else {
       document.documentElement.classList.remove('dark-mode');
+    }
+  }
+
+  logout() {
+    try {
+      // Nettoyer tous les tokens et données d'authentification
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('username');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('savedEmail');
+      
+      console.log('Déconnexion réussie');
+      
+      // Émettre l'événement de déconnexion au composant parent
+      this.logoutClick.emit();
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
     }
   }
 }

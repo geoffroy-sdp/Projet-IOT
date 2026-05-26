@@ -26,7 +26,7 @@
       <app-app-map *ngIf="currentPage === 'map'"></app-app-map>
       <app-app-music *ngIf="currentPage === 'music'"></app-app-music>
       <app-app-bluetooth *ngIf="currentPage === 'bluetooth'"></app-app-bluetooth>
-      <app-setting *ngIf="currentPage === 'settings'"></app-setting>
+      <app-setting *ngIf="currentPage === 'settings'" (logoutClick)="handleLogout()"></app-setting>
     </div>
   </div>
 
