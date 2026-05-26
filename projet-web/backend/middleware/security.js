@@ -15,9 +15,12 @@ const securityMiddleware = (req, res, next) => {
 };
 
 const corsMiddleware = (req, res, next) => {
-  const allowedOrigins = (process.env.ALLOWED_ORIGINS).split(',');
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS)
+    .split(',')
+    .map(origin => origin.trim()); // Trim whitespace
   const origin = req.headers.origin;
 
+  // Vérifier si l'origine est autorisée
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
@@ -25,8 +28,9 @@ const corsMiddleware = (req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Max-Age', '3600');
+  res.setHeader('Access-Control-Max-Age', '86400');
 
+  // Gérer les requêtes OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
