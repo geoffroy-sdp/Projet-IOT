@@ -28,6 +28,7 @@ const gpsBtn = document.getElementById('gpsBtn');
 const bluetoothBtn = document.getElementById('bluetoothBtn');
 const musicBtn = document.getElementById('musicBtn');
 const headerBackBtn = document.getElementById('headerBackBtn');
+const settingsBtn = document.getElementById('settingsBtn');
 
 const musicWebviewContainer = document.getElementById('musicWebviewContainer');
 const navidromeWebview = document.getElementById('navidromeWebview');
@@ -574,9 +575,19 @@ function initMainButtons() {
         });
     }
 
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            console.log('Paramètres cliqué');
+            openSettingsModal();
+        });
+    }
+
     if (headerBackBtn) {
         headerBackBtn.addEventListener('click', hideCurrentInterface);
     }
+
+    // Initialiser les contrôles de la modale de paramètres
+    initSettingsModal();
 }
 
 /**
@@ -1131,5 +1142,144 @@ function updateConnectedDevices() {
         if (routeAudioBtn) {
             routeAudioBtn.disabled = false;
         }
+    }
+}
+
+// ========== GESTION DE LA MODALE PARAMÈTRES ==========
+
+/**
+ * Initialise les contrôles de la modale de paramètres
+ */
+function initSettingsModal() {
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    const settingsForm = document.getElementById('settingsForm');
+
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener('click', closeSettingsModal);
+    }
+
+    if (cancelSettingsBtn) {
+        cancelSettingsBtn.addEventListener('click', closeSettingsModal);
+    }
+
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', saveSettings);
+    }
+
+    // Fermer la modale en cliquant en dehors
+    if (settingsModal) {
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                closeSettingsModal();
+            }
+        });
+    }
+
+    // Charger les paramètres au démarrage de la modale
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveSettings();
+        });
+    }
+}
+
+/**
+ * Ouvre la modale de paramètres et charge les valeurs actuelles
+ */
+async function openSettingsModal() {
+    const settingsModal = document.getElementById('settingsModal');
+    if (!settingsModal) return;
+
+    try {
+        // Charger les valeurs du .env
+        const settings = await window.electron.settings.loadSettings();
+        
+        if (settings) {
+            // Navidrome User
+            const navidromeUserInput = document.getElementById('navidromeUserInput');
+            if (navidromeUserInput && settings.NAVIDROME_USER) {
+                navidromeUserInput.value = settings.NAVIDROME_USER;
+            }
+
+            // Navidrome Password
+            const navidromePassInput = document.getElementById('navidromePassInput');
+            if (navidromePassInput && settings.NAVIDROME_PASS) {
+                navidromePassInput.value = settings.NAVIDROME_PASS;
+            }
+
+            // Backend User
+            const backendUserInput = document.getElementById('backendUserInput');
+            if (backendUserInput && settings.BACKEND_USER) {
+                backendUserInput.value = settings.BACKEND_USER;
+            }
+
+            // Backend Password
+            const backendPassInput = document.getElementById('backendPassInput');
+            if (backendPassInput && settings.BACKEND_PASS) {
+                backendPassInput.value = settings.BACKEND_PASS;
+            }
+
+            // GPS Serial Path
+            const gpsPathInput = document.getElementById('gpsPathInput');
+            if (gpsPathInput && settings.GPS_SERIAL_PATH) {
+                gpsPathInput.value = settings.GPS_SERIAL_PATH;
+            }
+        }
+
+        // Afficher la modale
+        settingsModal.classList.remove('hidden');
+    } catch (error) {
+        console.error('Erreur chargement paramètres:', error);
+        alert('Erreur lors du chargement des paramètres');
+    }
+}
+
+/**
+ * Ferme la modale de paramètres
+ */
+function closeSettingsModal() {
+    const settingsModal = document.getElementById('settingsModal');
+    if (settingsModal) {
+        settingsModal.classList.add('hidden');
+    }
+}
+
+/**
+ * Sauvegarde les paramètres modifiés
+ */
+async function saveSettings() {
+    try {
+        // Récupérer les valeurs du formulaire
+        const navidromeUserInput = document.getElementById('navidromeUserInput');
+        const navidromePassInput = document.getElementById('navidromePassInput');
+        const backendUserInput = document.getElementById('backendUserInput');
+        const backendPassInput = document.getElementById('backendPassInput');
+        const gpsPathInput = document.getElementById('gpsPathInput');
+
+        const settings = {
+            NAVIDROME_USER: navidromeUserInput?.value || '',
+            NAVIDROME_PASS: navidromePassInput?.value || '',
+            BACKEND_USER: backendUserInput?.value || '',
+            BACKEND_PASS: backendPassInput?.value || '',
+            GPS_SERIAL_PATH: gpsPathInput?.value || '/dev/ttyACM0'
+        };
+
+        // Sauvegarder les paramètres via IPC
+        const success = await window.electron.settings.saveSettings(settings);
+
+        if (success) {
+            console.log('Paramètres sauvegardés avec succès');
+            alert('Paramètres sauvegardés avec succès!');
+            closeSettingsModal();
+        } else {
+            alert('Erreur lors de la sauvegarde des paramètres');
+        }
+    } catch (error) {
+        console.error('Erreur sauvegarde paramètres:', error);
+        alert('Erreur: ' + error.message);
     }
 }

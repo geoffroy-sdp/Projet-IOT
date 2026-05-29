@@ -52,6 +52,14 @@ contextBridge.exposeInMainWorld('electron', {
     },
 
     /**
+     * Gestion des paramètres (.env)
+     */
+    settings: {
+        loadSettings: () => ipcRenderer.invoke('settings-load'),
+        saveSettings: (settings) => ipcRenderer.invoke('settings-save', settings)
+    },
+
+    /**
      * Envoyer un message au processus principal
      */
     send: (channel, data) => {

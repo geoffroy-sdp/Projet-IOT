@@ -320,6 +320,103 @@ ipcMain.handle('get-backend-credentials', async () => {
     return { user, pass };
 });
 
+// ========== IPC HANDLERS POUR LES PARAMÈTRES (.env) ==========
+
+/**
+ * Charge tous les paramètres du fichier .env
+ */
+ipcMain.handle('settings-load', async () => {
+    try {
+        const envPath = path.join(__dirname, '.env');
+        if (!fs.existsSync(envPath)) {
+            return null;
+        }
+
+        const content = fs.readFileSync(envPath, 'utf8');
+        const settings = {};
+        const lines = content.split(/\r?\n/);
+
+        lines.forEach((line) => {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('#')) return;
+            const idx = trimmed.indexOf('=');
+            if (idx === -1) return;
+            const k = trimmed.slice(0, idx).trim();
+            const v = trimmed.slice(idx + 1).trim();
+            settings[k] = v.replace(/^"|"$/g, '');
+        });
+
+        return settings;
+    } catch (e) {
+        console.error('Erreur chargement .env:', e);
+        return null;
+    }
+});
+
+/**
+ * Sauvegarde les paramètres dans le fichier .env (sauf NAVIDROME_URL)
+ */
+ipcMain.handle('settings-save', async (event, newSettings) => {
+    try {
+        const envPath = path.join(__dirname, '.env');
+        
+        // Charger les paramètres existants
+        let content = '';
+        if (fs.existsSync(envPath)) {
+            content = fs.readFileSync(envPath, 'utf8');
+        }
+
+        const lines = content.split(/\r?\n/);
+        const settings = {};
+        const updatedLines = [];
+
+        // Parser les paramètres existants et mettre à jour ceux que nous voulons changer
+        lines.forEach((line) => {
+            const trimmed = line.trim();
+            
+            // Garder les lignes vides et les commentaires
+            if (!trimmed || trimmed.startsWith('#')) {
+                updatedLines.push(line);
+                return;
+            }
+
+            const idx = trimmed.indexOf('=');
+            if (idx === -1) {
+                updatedLines.push(line);
+                return;
+            }
+
+            const k = trimmed.slice(0, idx).trim();
+            const v = trimmed.slice(idx + 1).trim();
+
+            // Mettre à jour les paramètres autorisés
+            if (newSettings.hasOwnProperty(k) && k !== 'NAVIDROME_URL') {
+                updatedLines.push(`${k}=${newSettings[k]}`);
+                settings[k] = newSettings[k];
+            } else {
+                updatedLines.push(line);
+            }
+        });
+
+        // Ajouter les nouveaux paramètres qui n'existent pas encore (sauf NAVIDROME_URL)
+        Object.keys(newSettings).forEach((key) => {
+            if (!settings.hasOwnProperty(key) && key !== 'NAVIDROME_URL') {
+                updatedLines.push(`${key}=${newSettings[key]}`);
+            }
+        });
+
+        // Écrire le fichier .env
+        const newContent = updatedLines.join('\n');
+        fs.writeFileSync(envPath, newContent, 'utf8');
+
+        console.log('✓ Paramètres sauvegardés');
+        return true;
+    } catch (e) {
+        console.error('Erreur sauvegarde .env:', e);
+        return false;
+    }
+});
+
 /**
  * Crée la fenêtre principale (écran CarPlay)
  */

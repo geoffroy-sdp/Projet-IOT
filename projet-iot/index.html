@@ -78,6 +78,55 @@
                 </div>
             </div>
         </main>
+
+        <!-- Modale Paramètres -->
+        <div id="settingsModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Paramètres</h2>
+                    <button class="modal-close-btn" id="closeSettingsBtn" title="Fermer">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="settingsForm">
+                        <!-- Navidrome User -->
+                        <div class="setting-group">
+                            <label for="navidromeUserInput">Utilisateur Navidrome:</label>
+                            <input type="text" id="navidromeUserInput" name="NAVIDROME_USER" class="setting-input">
+                        </div>
+
+                        <!-- Navidrome Password -->
+                        <div class="setting-group">
+                            <label for="navidromePassInput">Mot de passe Navidrome:</label>
+                            <input type="password" id="navidromePassInput" name="NAVIDROME_PASS" class="setting-input">
+                        </div>
+
+                        <!-- Backend User -->
+                        <div class="setting-group">
+                            <label for="backendUserInput">Email Backend:</label>
+                            <input type="email" id="backendUserInput" name="BACKEND_USER" class="setting-input">
+                        </div>
+
+                        <!-- Backend Password -->
+                        <div class="setting-group">
+                            <label for="backendPassInput">Mot de passe Backend:</label>
+                            <input type="password" id="backendPassInput" name="BACKEND_PASS" class="setting-input">
+                        </div>
+
+                        <!-- GPS Serial Path -->
+                        <div class="setting-group">
+                            <label for="gpsPathInput">Chemin du port GPS:</label>
+                            <input type="text" id="gpsPathInput" name="GPS_SERIAL_PATH" class="setting-input" placeholder="/dev/ttyACM0">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelSettingsBtn" class="btn-secondary">Annuler</button>
+                    <button id="saveSettingsBtn" class="btn-primary">Enregistrer</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="node_modules/leaflet/dist/leaflet.js"></script>
