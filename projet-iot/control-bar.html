@@ -41,14 +41,15 @@
             <!-- Séparateur -->
             <div class="divider"></div>
 
-            <!-- Sélection Sortie Audio -->
-            <div class="output-select">
-                <label for="audioOutput" class="output-label">Sortie:</label>
-                <select id="audioOutput" class="output-dropdown">
-                    <option value="speakers">Enceintes</option>
-                    <option value="bluetooth">Bluetooth</option>
-                    <option value="jack">Jack</option>
-                </select>
+            <!-- Statut Audio/Musique -->
+            <div class="audio-status">
+                <label class="status-label">Sortie:</label>
+                <div class="status-display" id="audioStatusDisplay">
+                    <span class="status-icon" id="statusIcon">
+                        <i class="fas fa-music"></i>
+                    </span>
+                    <span class="status-text" id="statusText">Aucune source</span>
+                </div>
             </div>
         </div>
     </div>

@@ -8,6 +8,7 @@ const { securityMiddleware, corsMiddleware, rateLimitMiddleware, securityLoggerM
 const userRoutes = require('./routes/users');
 const adminRoutes = require('./routes/admin');
 const bluetoothRoutes = require('./routes/bluetooth'); // ← AJOUT
+const publicRoutes = require('./routes/public');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -52,6 +53,7 @@ app.use(requestLogger(logger));
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/bluetooth', bluetoothRoutes); // ← AJOUT
+app.use('/api/public', publicRoutes);
 
 // Routes de logging (protégées)
 app.get('/api/logs/:type', async (req, res) => {

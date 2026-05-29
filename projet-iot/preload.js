@@ -30,6 +30,11 @@ contextBridge.exposeInMainWorld('electron', {
     /**
      * Gestion Bluetooth
      */
+    // Backend auth credentials (from .env read by main)
+    auth: {
+        getCredentials: () => ipcRenderer.invoke('get-backend-credentials')
+    },
+
     bluetooth: {
         enableDiscovery: () => ipcRenderer.invoke('bluetooth-enable-discovery'),
         disableDiscovery: () => ipcRenderer.invoke('bluetooth-disable-discovery'),

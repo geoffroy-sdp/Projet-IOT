@@ -10,7 +10,8 @@
   "author": "Speed",
   "license": "MIT",
   "dependencies": {
+    "dbus-next": "^0.10.2",
     "electron": "21.4.0",
-    "dbus-next": "^0.10.2"
+    "leaflet": "^1.9.4"
   }
 }

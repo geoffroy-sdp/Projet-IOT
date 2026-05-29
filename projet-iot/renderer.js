@@ -4,11 +4,15 @@ let currentVolume = 70;
 let isMuted = false;
 let audioOutputs = [];
 let currentOutput = null;
+let bluetoothConnected = false;
+let bluetoothPlaying = false;
+let navidromeActive = false;
 
 // ========== ÉTAT BLUETOOTH ==========
 let bluetoothDevices = [];
 let selectedBluetoothDevice = null;
 let isAudioRouted = false;
+let discoveryActive = false;
 
 // ========== ÉLEMENTS DU DOM BARRE DE CONTRÔLE ==========
 const playPauseBtn = document.getElementById('playPauseBtn');
@@ -26,15 +30,16 @@ const musicBtn = document.getElementById('musicBtn');
 const headerBackBtn = document.getElementById('headerBackBtn');
 
 const musicWebviewContainer = document.getElementById('musicWebviewContainer');
-const backFromMusic = document.getElementById('backFromMusic');
-const trackTitle = document.getElementById('trackTitle');
-const trackArtist = document.getElementById('trackArtist');
-const trackAlbum = document.getElementById('trackAlbum');
-const trackStatus = document.getElementById('trackStatus');
-const musicPlayPauseBtn = document.getElementById('musicPlayPauseBtn');
-const musicPrevBtn = document.getElementById('musicPrevBtn');
-const musicNextBtn = document.getElementById('musicNextBtn');
 const navidromeWebview = document.getElementById('navidromeWebview');
+
+// Elements musicaux (legacy, non utilisés avec la webview)
+const trackTitle = null;
+const trackArtist = null;
+const trackAlbum = null;
+const trackStatus = null;
+const musicPlayPauseBtn = null;
+const musicPrevBtn = null;
+const musicNextBtn = null;
 
 const gpsContainer = document.getElementById('gpsContainer');
 const gpsStatusBar = document.getElementById('gpsStatusBar');
@@ -44,15 +49,13 @@ let webviewPollingInterval = null;
 let gpsMap = null;
 let gpsMarker = null;
 let gpsAccuracyCircle = null;
+let storedPolyline = null;
+let storedMarkers = [];
 
 // ========== ÉLÉMENTS DU DOM BLUETOOTH ==========
 const bluetoothInterface = document.getElementById('bluetoothInterface');
-const enableDiscoveryBtn = document.getElementById('enableDiscoveryBtn');
-const backFromBluetooth = document.getElementById('backFromBluetooth');
 const devicesList = document.getElementById('devicesList');
 const discoveryStatus = document.getElementById('discoveryStatus');
-const routeAudioBtn = document.getElementById('routeAudioBtn');
-const routingStatus = document.getElementById('routingStatus');
 
 // ========== INITIALISATION ==========
 document.addEventListener('DOMContentLoaded', async () => {
@@ -74,7 +77,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.electron?.gps?.onStatus) {
         window.electron.gps.onStatus(updateGPSStatus);
     }
-    updateGPSStatus('GPS: inactif');
+    updateGPSStatus('GPS actif');
+    if (window.electron?.gps?.start) {
+        window.electron.gps.start().then((result) => {
+            if (!result?.success) {
+                updateGPSStatus(result?.message || 'Impossible de démarrer le GPS');
+            }
+        }).catch((err) => {
+            console.error('Erreur démarrage GPS initial:', err);
+            updateGPSStatus('Erreur GPS: ' + (err.message || err));
+        });
+    }
+
+    // Initialiser la découverte Bluetooth automatique en arrière-plan
+    initAutoBluetoothDiscovery();
+
+    // Écouter les changements de connexion Bluetooth
+    listenBluetoothConnectionChanges();
 });
 
 // ========== GESTION DE LA BARRE DE CONTRÔLE ==========
@@ -192,6 +211,7 @@ async function togglePlayback() {
                 isPlaying = (res === 'playing' || res === 'toggled');
                 updatePlayPauseIcon();
                 updateMusicPlayPauseIcon();
+                updateAudioStatus();
                 await refreshTrackInfo();
                 return;
             }
@@ -208,6 +228,7 @@ async function togglePlayback() {
             isPlaying = status === 'Playing';
             updatePlayPauseIcon();
             updateMusicPlayPauseIcon();
+            updateAudioStatus();
             refreshTrackInfo();
             console.log(isPlaying ? 'Lecture' : 'Pause');
         }
@@ -554,42 +575,7 @@ function initMainButtons() {
     }
 
     if (headerBackBtn) {
-        headerBackBtn.addEventListener('click', () => {
-            if (gpsContainer && !gpsContainer.classList.contains('hidden')) {
-                hideGPSInterface();
-            } else {
-                hideMusicInterface();
-            }
-        });
-    }
-
-    if (backFromMusic) {
-        backFromMusic.addEventListener('click', hideMusicInterface);
-    }
-
-    if (musicPlayPauseBtn) {
-        musicPlayPauseBtn.addEventListener('click', togglePlayback);
-    }
-
-    if (musicPrevBtn) {
-        musicPrevBtn.addEventListener('click', () => navigateNavidromeTrack(-1));
-    }
-
-    if (musicNextBtn) {
-        musicNextBtn.addEventListener('click', () => navigateNavidromeTrack(1));
-    }
-
-    // Initialiser les événements Bluetooth
-    if (backFromBluetooth) {
-        backFromBluetooth.addEventListener('click', hideBluetoothInterface);
-    }
-
-    if (enableDiscoveryBtn) {
-        enableDiscoveryBtn.addEventListener('click', toggleBluetoothDiscovery);
-    }
-
-    if (routeAudioBtn) {
-        routeAudioBtn.addEventListener('click', routeBluetoothAudio);
+        headerBackBtn.addEventListener('click', hideCurrentInterface);
     }
 }
 
@@ -609,10 +595,15 @@ async function showMusicInterface() {
         if (bluetoothInterface) {
             bluetoothInterface.classList.add('hidden');
         }
+        if (gpsContainer) {
+            gpsContainer.classList.add('hidden');
+        }
         if (headerBackBtn) {
             headerBackBtn.classList.remove('hidden');
         }
         document.querySelector('.main-content')?.classList.add('music-active');
+        navidromeActive = true;
+        updateAudioStatus();
         // Load Navidrome web UI into webview
         try {
             const serverUrl = await window.electron.navidrome.getServerUrl();
@@ -688,6 +679,8 @@ function hideMusicInterface() {
         }
         document.querySelector('.main-content')?.classList.remove('music-active');
         stopWebviewPolling();
+        navidromeActive = false;
+        updateAudioStatus();
     }
 }
 
@@ -706,6 +699,13 @@ function showGPSInterface() {
         }
         document.querySelector('.main-content')?.classList.add('gps-active');
         initGPSMap();
+        setTimeout(() => {
+            if (gpsMap) {
+                gpsMap.invalidateSize();
+            }
+        }, 150);
+        // Charger les points GPS stockés depuis le serveur projet-web
+        fetchStoredGpsPoints();
         window.electron.gps.start().then((result) => {
             console.log('GPS start result', result);
             if (!result?.success) {
@@ -726,7 +726,7 @@ function hideGPSInterface() {
             headerBackBtn.classList.add('hidden');
         }
         document.querySelector('.main-content')?.classList.remove('gps-active');
-        window.electron.gps.stop();
+        // Ne pas arrêter le GPS ici : il doit continuer à tourner en arrière-plan.
     }
 }
 
@@ -738,20 +738,107 @@ function initGPSMap() {
             maxZoom: 19,
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(gpsMap);
-        gpsMarker = L.marker([0, 0]).addTo(gpsMap);
-        gpsAccuracyCircle = L.circle([0, 0], { radius: 0, color: '#38bdf8', weight: 2, fillColor: 'rgba(56, 189, 248, 0.15)' }).addTo(gpsMap);
+    }
+}
+
+async function fetchStoredGpsPoints() {
+    try {
+        // Try to login to projet-web using credentials from .env (exposed by main)
+        const creds = await window.electron?.auth?.getCredentials?.();
+        let points = null;
+
+        if (creds && creds.user && creds.pass) {
+            try {
+                const loginRes = await fetch('https://projet-web-6s9w.onrender.com/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: creds.user, password: creds.pass })
+                });
+                const loginJson = await loginRes.json();
+                if (loginRes.ok && loginJson && loginJson.success && loginJson.data && loginJson.data.token) {
+                    const token = loginJson.data.token;
+                    const res = await fetch('https://projet-web-6s9w.onrender.com/api/users/gps?limit=5', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json && Array.isArray(json.data)) {
+                            // Ensure chronological order (oldest first)
+                            points = json.data.slice().reverse();
+                        }
+                    }
+                } else {
+                    console.warn('Login failed for backend credentials', loginJson && loginJson.message);
+                }
+            } catch (err) {
+                console.error('Error logging in to backend:', err);
+            }
+        }
+
+        // Fallback to public endpoint (limited to 5)
+        if (!points) {
+            try {
+                const res = await fetch('https://projet-web-6s9w.onrender.com/api/public/gps?limit=5');
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json && json.success && Array.isArray(json.data)) {
+                        points = json.data; // public route already returns chronological order
+                    }
+                }
+            } catch (err) {
+                console.error('Fallback public fetch error:', err);
+            }
+        }
+
+        if (points && Array.isArray(points) && points.length > 0) {
+            renderStoredGpsPoints(points);
+        }
+    } catch (err) {
+        console.error('Erreur récupération points stockés:', err);
+    }
+}
+
+function renderStoredGpsPoints(points) {
+    if (!gpsMap || !points || points.length === 0) return;
+
+    // Clear previous
+    if (storedPolyline) {
+        gpsMap.removeLayer(storedPolyline);
+        storedPolyline = null;
+    }
+    storedMarkers.forEach(m => gpsMap.removeLayer(m));
+    storedMarkers = [];
+
+    const coords = points.map(p => [p.latitude, p.longitude]);
+    storedPolyline = L.polyline(coords, { color: '#3b82f6', weight: 3, opacity: 0.9 }).addTo(gpsMap);
+
+    // Start marker
+    const start = points[0];
+    const end = points[points.length - 1];
+    const startMarker = L.marker([start.latitude, start.longitude]).addTo(gpsMap).bindPopup(`<b>Départ</b><br>${start.latitude.toFixed(6)}, ${start.longitude.toFixed(6)}`);
+    const endMarker = L.marker([end.latitude, end.longitude]).addTo(gpsMap).bindPopup(`<b>Arrivée</b><br>${end.latitude.toFixed(6)}, ${end.longitude.toFixed(6)}`);
+    storedMarkers.push(startMarker, endMarker);
+
+    try {
+        gpsMap.fitBounds(storedPolyline.getBounds(), { padding: [20, 20] });
+    } catch (e) {
+        console.warn('fitBounds failed', e);
     }
 }
 
 function updateGPSStatus(message) {
     if (gpsStatusBar) {
-        gpsStatusBar.textContent = message;
+        if (message && message.startsWith('Erreur')) {
+            gpsStatusBar.textContent = message;
+        } else {
+            gpsStatusBar.textContent = 'GPS: actif';
+        }
     }
 }
 
 function updateGPSPosition(position) {
     if (!position || typeof position.latitude !== 'number' || typeof position.longitude !== 'number') return;
-    updateGPSStatus(`GPS: ${position.latitude.toFixed(6)}, ${position.longitude.toFixed(6)}${position.altitude ? ' | Alt: ' + position.altitude.toFixed(1) + 'm' : ''}`);
+    updateGPSStatus('GPS actif');
     if (!gpsMap) initGPSMap();
     const latlng = [position.latitude, position.longitude];
     gpsMap.setView(latlng, position.zoom || 16);
@@ -771,6 +858,15 @@ function showBluetoothInterface() {
     if (bluetoothInterface) {
         bluetoothInterface.classList.remove('hidden');
         document.querySelector('.menu-grid').classList.add('hidden');
+        if (musicWebviewContainer) {
+            musicWebviewContainer.classList.add('hidden');
+        }
+        if (gpsContainer) {
+            gpsContainer.classList.add('hidden');
+        }
+        if (headerBackBtn) {
+            headerBackBtn.classList.remove('hidden');
+        }
         refreshConnectedDevices();
     }
 }
@@ -782,97 +878,103 @@ function hideBluetoothInterface() {
     if (bluetoothInterface) {
         bluetoothInterface.classList.add('hidden');
         document.querySelector('.menu-grid').classList.remove('hidden');
-        // Désactiver la découverte en quittant
-        disableBluetoothDiscovery();
+        if (headerBackBtn) {
+            headerBackBtn.classList.add('hidden');
+        }
+        // NE PAS désactiver la découverte - rester connecté en arrière-plan
     }
 }
 
 /**
- * Active/Désactive la mode de découverte Bluetooth
+ * Cache l'interface actuelle et retour au menu principal
  */
-let discoveryActive = false;
-let discoveryInterval = null;
-
-async function toggleBluetoothDiscovery() {
-    if (discoveryActive) {
-        disableBluetoothDiscovery();
-    } else {
-        enableBluetoothDiscovery();
+function hideCurrentInterface() {
+    if (gpsContainer && !gpsContainer.classList.contains('hidden')) {
+        hideGPSInterface();
+    } else if (musicWebviewContainer && !musicWebviewContainer.classList.contains('hidden')) {
+        hideMusicInterface();
+    } else if (bluetoothInterface && !bluetoothInterface.classList.contains('hidden')) {
+        hideBluetoothInterface();
     }
 }
 
-/**
- * Actives la découverte Bluetooth
- */
-async function enableBluetoothDiscovery() {
-    if (enableDiscoveryBtn) {
-        enableDiscoveryBtn.disabled = true;
-    }
+// ========== GESTION DE LA DÉCOUVERTE BLUETOOTH AUTOMATIQUE ==========
 
+/**
+ * Initialise la découverte Bluetooth automatique en arrière-plan
+ */
+async function initAutoBluetoothDiscovery() {
     try {
-        // Appeler le backend pour activer la découverte
+        // Appeler le backend pour activer la découverte (script bt_pairing.sh)
         const success = await window.electron?.bluetooth?.enableDiscovery?.();
         
         if (success) {
             discoveryActive = true;
+            console.log('Découverte Bluetooth automatique activée');
             
-            if (enableDiscoveryBtn) {
-                enableDiscoveryBtn.innerHTML = '<i class="fas fa-stop-circle"></i> Arrêter Découverte';
-                enableDiscoveryBtn.style.background = '#ef4444';
-            }
+            // Rafraîchir la liste des appareils tous les 3 secondes en arrière-plan
+            setInterval(refreshConnectedDevices, 3000);
             
-            if (discoveryStatus) {
-                discoveryStatus.textContent = '🔍 Découverte Activée - Connectez votre téléphone';
-                discoveryStatus.style.color = '#10b981';
-            }
-
-            // Rafraîchir la liste tous les 2 secondes
-            if (discoveryInterval) clearInterval(discoveryInterval);
-            discoveryInterval = setInterval(refreshConnectedDevices, 2000);
-
             // Rafraîchissement initial
             refreshConnectedDevices();
         }
     } catch (error) {
-        console.error('Erreur activation découverte:', error);
-        if (discoveryStatus) {
-            discoveryStatus.textContent = 'Erreur: ' + error.message;
-            discoveryStatus.style.color = '#ff0000';
-        }
-    } finally {
-        if (enableDiscoveryBtn) {
-            enableDiscoveryBtn.disabled = false;
+        console.error('Erreur initialisation découverte Bluetooth:', error);
+    }
+}
+
+/**
+ * Écoute les changements de connexion Bluetooth
+ */
+async function listenBluetoothConnectionChanges() {
+    if (window.electron?.bluetooth?.listenConnection) {
+        try {
+            await window.electron.bluetooth.listenConnection((status) => {
+                console.log('État Bluetooth:', status);
+                bluetoothConnected = (status === 'connected');
+                if (bluetoothConnected) {
+                    bluetoothPlaying = true;
+                } else {
+                    bluetoothPlaying = false;
+                }
+                updateAudioStatus();
+                refreshConnectedDevices();
+            });
+        } catch (error) {
+            console.error('Erreur écoute connexion Bluetooth:', error);
         }
     }
 }
 
 /**
- * Désactive la découverte Bluetooth
+ * Met à jour le statut audio dans la barre du bas
  */
-async function disableBluetoothDiscovery() {
-    try {
-        // Appeler le backend pour désactiver la découverte
-        await window.electron?.bluetooth?.disableDiscovery?.();
-        
-        discoveryActive = false;
-        
-        if (enableDiscoveryBtn) {
-            enableDiscoveryBtn.innerHTML = '<i class="fas fa-wifi"></i> Activer la Découverte';
-            enableDiscoveryBtn.style.background = 'var(--accent-blue)';
-        }
-        
-        if (discoveryStatus) {
-            discoveryStatus.textContent = 'Inactif';
-            discoveryStatus.style.color = 'var(--text-secondary)';
-        }
+function updateAudioStatus() {
+    const statusDisplay = document.getElementById('audioStatusDisplay');
+    const statusIcon = document.getElementById('statusIcon');
+    const statusText = document.getElementById('statusText');
+    
+    if (!statusDisplay) return;
 
-        if (discoveryInterval) {
-            clearInterval(discoveryInterval);
-            discoveryInterval = null;
-        }
-    } catch (error) {
-        console.error('Erreur désactivation découverte:', error);
+    let icon = '<i class="fas fa-music"></i>';
+    let text = 'Aucune source';
+
+    if (bluetoothConnected && bluetoothPlaying) {
+        icon = '<i class="fas fa-bluetooth" style="color: #3b82f6;"></i>';
+        text = 'Bluetooth en cours';
+    } else if (navidromeActive && isPlaying) {
+        icon = '<i class="fas fa-music" style="color: #10b981;"></i>';
+        text = 'Navidrome en cours';
+    } else if (bluetoothConnected) {
+        icon = '<i class="fas fa-bluetooth" style="color: #9ca3af;"></i>';
+        text = 'Bluetooth connecté';
+    } else if (navidromeActive) {
+        icon = '<i class="fas fa-music" style="color: #9ca3af;"></i>';
+        text = 'Navidrome prêt';
     }
+
+    if (statusIcon) statusIcon.innerHTML = icon;
+    if (statusText) statusText.textContent = text;
 }
 
 /**
@@ -895,6 +997,17 @@ async function refreshConnectedDevices() {
  */
 function displayBluetoothDevices(devices) {
     if (!devicesList) return;
+
+    // Mettre à jour le statut de découverte
+    if (discoveryStatus) {
+        if (discoveryActive) {
+            discoveryStatus.textContent = '🔍 Recherche d\'appareils...';
+            discoveryStatus.style.color = '#3b82f6';
+        } else {
+            discoveryStatus.textContent = 'Découverte inactive';
+            discoveryStatus.style.color = 'var(--text-secondary)';
+        }
+    }
 
     devicesList.innerHTML = '';
 
@@ -946,9 +1059,9 @@ async function connectBTDevice(address) {
         const success = await window.electron?.bluetooth?.connectDevice?.(address);
         if (success) {
             selectedBluetoothDevice = address;
-            if (routeAudioBtn) {
-                routeAudioBtn.disabled = false;
-            }
+            bluetoothConnected = true;
+            bluetoothPlaying = true;
+            updateAudioStatus();
             refreshConnectedDevices(); // Rafraîchir la liste
         }
     } catch (error) {
@@ -968,13 +1081,10 @@ async function disconnectBTDevice(address) {
         if (success) {
             if (selectedBluetoothDevice === address) {
                 selectedBluetoothDevice = null;
+                bluetoothConnected = false;
+                bluetoothPlaying = false;
                 isAudioRouted = false;
-                if (routeAudioBtn) {
-                    routeAudioBtn.disabled = true;
-                }
-                if (routingStatus) {
-                    routingStatus.textContent = 'Inactif';
-                }
+                updateAudioStatus();
             }
             refreshConnectedDevices(); // Rafraîchir la liste
         }

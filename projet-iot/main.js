@@ -65,7 +65,6 @@ function loadEnvFileValue(key) {
 
 function findGPSDevicePath() {
     // Deprecated: GPS est lancé via scripts/start.sh
-    console.log('GPS: utilisation du FIFO', gpsFifoPath);
     return gpsFifoPath;
 }
 
@@ -84,33 +83,25 @@ function parseNMEACoordinate(value, hemisphere) {
 
 function parseNMEALine(line) {
     if (!line.startsWith('$')) {
-        console.log('GPS: ligne ne commence pas par $');
         return null;
     }
     const parts = line.split(',');
-    console.log('GPS: type NMEA:', parts[0], 'parts count:', parts.length);
     
     if (parts[0].includes('GGA')) {
-        console.log('GPS: parsing GGA');
         const lat = parseNMEACoordinate(parts[2], parts[3]);
         const lon = parseNMEACoordinate(parts[4], parts[5]);
         const fix = parts[6];
         const altitude = parseFloat(parts[9]) || null;
-        console.log('GPS: GGA lat=', lat, 'lon=', lon, 'fix=', fix, 'alt=', altitude);
         if (lat !== null && lon !== null && fix && fix !== '0') {
             return { latitude: lat, longitude: lon, altitude, accuracy: null, source: 'GGA' };
-        } else {
-            console.log('GPS: GGA incomplet ou pas de fix');
         }
     }
     if (parts[0].includes('RMC')) {
-        console.log('GPS: parsing RMC');
         const status = parts[2];
         const lat = parseNMEACoordinate(parts[3], parts[4]);
         const lon = parseNMEACoordinate(parts[5], parts[6]);
         const speedKnots = parseFloat(parts[7]) || 0;
         const course = parseFloat(parts[8]) || null;
-        console.log('GPS: RMC status=', status, 'lat=', lat, 'lon=', lon, 'speed=', speedKnots);
         if (status === 'A' && lat !== null && lon !== null) {
             return {
                 latitude: lat,
@@ -121,37 +112,33 @@ function parseNMEALine(line) {
                 accuracy: null,
                 source: 'RMC'
             };
-        } else {
-            console.log('GPS: RMC incomplet ou status invalide');
         }
     }
-    console.log('GPS: type NMEA non reconnu ou incomplet');
     return null;
 }
 
 function sendGpsPosition(position) {
     gpsState.lastPosition = position;
     gpsState.lastError = null;
-    console.log('GPS: position envoyée au renderer', position);
     if (mainWindow && mainWindow.webContents) {
         mainWindow.webContents.send('gps-position', position);
     }
 }
 
 function sendGpsStatus(status) {
+    const normalizedStatus = status && status.startsWith('Erreur') ? status : 'GPS actif';
     gpsState.lastError = status && status.startsWith('Erreur') ? status : gpsState.lastError;
-    console.log('GPS: statut', status);
     if (mainWindow && mainWindow.webContents) {
-        mainWindow.webContents.send('gps-status', status);
+        mainWindow.webContents.send('gps-status', normalizedStatus);
     }
 }
 
 function startGPS() {
-    if (gpsReader) {
-        gpsState.connected = true;
-        sendGpsStatus('GPS connecté');
-        return { success: true };
+    if (!gpsReader) {
+        initGPSReader();
     }
+    gpsState.connected = true;
+    sendGpsStatus('GPS actif');
     return { success: true };
 }
 
@@ -171,49 +158,43 @@ function getGPSStatus() {
 }
 
 function initGPSReader() {
-    console.log('GPS: initialisation du lecteur FIFO', gpsFifoPath);
+    sendGpsStatus('GPS actif');
     if (!fs.existsSync(gpsFifoPath)) {
-        console.warn('GPS: FIFO non trouvé, création en attente...');
         setTimeout(initGPSReader, 1000);
         return;
     }
     try {
         gpsReader = fs.createReadStream(gpsFifoPath, { encoding: 'utf8' });
-        console.log('GPS: lecteur FIFO ouvert');
         gpsReader.on('error', (err) => {
             console.error('GPS reader FIFO error:', err);
             gpsReader = null;
             gpsState.connected = false;
             sendGpsStatus('Erreur GPS: ' + (err.message || err));
+            setTimeout(initGPSReader, 1000);
         });
         const rl = readline.createInterface({ input: gpsReader });
         rl.on('line', (line) => {
             const trimmedLine = line.trim();
-            console.log('GPS: ligne reçue du FIFO:', trimmedLine);
             if (trimmedLine.startsWith('$')) {
-                console.log('GPS: parsing NMEA...');
                 const position = parseNMEALine(trimmedLine);
-                console.log('GPS: position parsée:', position);
                 if (position) {
                     gpsState.connected = true;
                     gpsState.lastError = null;
-                    console.log('GPS: position envoyée au renderer');
                     sendGpsPosition(position);
-                } else {
-                    console.log('GPS: ligne NMEA ne contient pas de position valide');
                 }
             }
         });
         gpsReader.on('close', () => {
-            console.log('GPS reader FIFO fermé');
             gpsReader = null;
             gpsState.connected = false;
-            sendGpsStatus('GPS arrêté');
+            sendGpsStatus('GPS actif');
+            setTimeout(initGPSReader, 1000);
         });
         gpsState.connected = true;
-        sendGpsStatus('GPS connecté: ' + gpsFifoPath);
+        sendGpsStatus('GPS actif');
     } catch (err) {
         console.error('GPS init error:', err);
+        gpsReader = null;
         gpsState.connected = false;
         gpsState.lastError = err.message || String(err);
         sendGpsStatus('Erreur GPS: ' + gpsState.lastError);
@@ -330,6 +311,13 @@ ipcMain.handle('navidrome-get-credentials', async () => {
     const user = envUser || (navidromeConfig && navidromeConfig.username) || null;
     const pass = envPass || (navidromeConfig && navidromeConfig.password) || null;
     return { username: user, password: pass };
+});
+
+// Expose backend (projet-web) credentials to renderer (read from process.env or .env)
+ipcMain.handle('get-backend-credentials', async () => {
+    const user = process.env.BACKEND_USER || loadEnvFileValue('BACKEND_USER') || null;
+    const pass = process.env.BACKEND_PASS || loadEnvFileValue('BACKEND_PASS') || null;
+    return { user, pass };
 });
 
 /**
