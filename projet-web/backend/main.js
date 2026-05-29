@@ -23,7 +23,7 @@ app.use(securityLoggerMiddleware);
 // Configure express CORS properly
 const corsOptions = {
   origin: function(origin, callback) {
-    const allowedOriginsEnv = process.env.ALLOWED_ORIGINS || 'http://localhost:5000,https://projet-iot-tau.vercel.app';
+    const allowedOriginsEnv = process.env.ALLOWED_ORIGINS?.trim() || 'http://localhost:5000,https://projet-iot-tau.vercel.app';
     
     // If ALLOWED_ORIGINS is '*', allow all origins
     if (allowedOriginsEnv === '*') {

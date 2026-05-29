@@ -15,16 +15,24 @@ const securityMiddleware = (req, res, next) => {
 };
 
 const corsMiddleware = (req, res, next) => {
-  const allowedOriginsEnv = process.env.ALLOWED_ORIGINS || 'http://localhost:5000,https://projet-iot-tau.vercel.app';
+  let allowedOriginsEnv = process.env.ALLOWED_ORIGINS?.trim();
+  if (!allowedOriginsEnv) {
+    allowedOriginsEnv = 'http://localhost:5000,https://projet-iot-tau.vercel.app';
+  }
+
   const allowedOrigins = allowedOriginsEnv
     .split(',')
-    .map(origin => origin.trim());
+    .map(origin => origin.trim())
+    .filter(Boolean);
   const origin = req.headers.origin;
 
   // Vérifier si l'origine est autorisée
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else if (!origin) {
+  if (origin) {
+    if (allowedOriginsEnv === '*' || allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+    }
+  } else {
     // Si pas d'origin (requête non-CORS), permettre quand même
     res.setHeader('Access-Control-Allow-Origin', '*');
   }
