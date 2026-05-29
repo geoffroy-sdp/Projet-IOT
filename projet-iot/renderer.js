@@ -46,6 +46,10 @@ const gpsContainer = document.getElementById('gpsContainer');
 const gpsStatusBar = document.getElementById('gpsStatusBar');
 const gpsMapElement = document.getElementById('gpsMap');
 
+// Elements Bluetooth (optionnels, peuvent être null)
+const routeAudioBtn = document.getElementById('routeAudioBtn');
+const routingStatus = document.getElementById('routingStatus');
+
 let webviewPollingInterval = null;
 let gpsMap = null;
 let gpsMarker = null;
