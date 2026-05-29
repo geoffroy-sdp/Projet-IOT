@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarPlay Audio Control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Barre de Contrôle Audio -->
+    <div class="audio-control-bar">
+        <div class="audio-controls-container">
+            <!-- Contrôles de Lecture -->
+            <div class="playback-controls">
+                <button class="audio-btn" id="prevBtn" title="Précédent">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+
+                <button class="audio-btn pause-play-btn" id="playPauseBtn" title="Lecture/Pause">
+                    <i class="fas fa-play"></i>
+                </button>
+
+                <button class="audio-btn" id="nextBtn" title="Suivant">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+            </div>
+
+            <!-- Séparateur -->
+            <div class="divider"></div>
+
+            <!-- Contrôle de Volume -->
+            <div class="volume-control">
+                <button class="audio-btn" id="muteBtn" title="Mute">
+                    <i class="fas fa-volume-high"></i>
+                </button>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                <span class="volume-value" id="volumeValue">70%</span>
+            </div>
+
+            <!-- Séparateur -->
+            <div class="divider"></div>
+
+            <!-- Sélection Sortie Audio -->
+            <div class="output-select">
+                <label for="audioOutput" class="output-label">Sortie:</label>
+                <select id="audioOutput" class="output-dropdown">
+                    <option value="speakers">Enceintes</option>
+                    <option value="bluetooth">Bluetooth</option>
+                    <option value="jack">Jack</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarPlay Interface</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2o6nldvbronlsj0AiXW6YH9yai9l7Rc+22Qm2Rk=" crossorigin="" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Écran Principal -->
+    <div class="main-display">
+        <!-- Header avec Settings -->
+        <header class="header">
+            <div class="header-content">
+                <button class="back-btn header-back-btn hidden" id="headerBackBtn" title="Retour">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </button>
+                <h1>CarPlay</h1>
+                <button class="settings-btn" id="settingsBtn" title="Paramètres">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Contenu Principal -->
+        <main class="main-content">
+            <!-- Menu Principal -->
+            <div class="menu-grid">
+                <!-- Bouton GPS -->
+                <button class="menu-btn gps-btn" id="gpsBtn" title="GPS">
+                    <div class="menu-icon">
+                        <i class="fas fa-map-location-dot"></i>
+                    </div>
+                    <span class="menu-label">GPS</span>
+                </button>
+
+                <!-- Bouton Bluetooth -->
+                <button class="menu-btn bluetooth-btn" id="bluetoothBtn" title="Bluetooth">
+                    <div class="menu-icon">
+                        <i class="fa-brands fa-bluetooth"></i>
+                    </div>
+                    <span class="menu-label">Bluetooth</span>
+                </button>
+
+                <!-- Bouton Musique -->
+                <button class="menu-btn music-btn" id="musicBtn" title="Musique">
+                    <div class="menu-icon">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <span class="menu-label">Musique</span>
+                </button>
+            </div>
+
+            <!-- Interface GPS -->
+            <div id="gpsContainer" class="gps-container hidden">
+                <div class="gps-status-bar" id="gpsStatusBar">GPS: inactif</div>
+                <div id="gpsMap" class="gps-map"></div>
+            </div>
+
+            <!-- Interface Musique: remplacée par une webview Navidrome -->
+            <div id="musicWebviewContainer" class="music-webview-container hidden">
+                <!-- Navidrome webview full area. Use the top header back button to go back. -->
+                <webview id="navidromeWebview" src="about:blank" style="width:100%;height:100%;" partition="persist:navidrome" allowpopups></webview>
+            </div>
+
+            <!-- Interface Bluetooth -->
+            <div id="bluetoothInterface" class="bluetooth-interface hidden">
+                <div class="bluetooth-header">
+                    <button class="back-btn" id="backFromBluetooth">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </button>
+                    <h2>Bluetooth</h2>
+                </div>
+
+                <!-- Activation Découverte -->
+                <div class="bluetooth-controls">
+                    <button class="scan-btn" id="enableDiscoveryBtn">
+                        <i class="fas fa-wifi"></i> Activer la Découverte
+                    </button>
+                    <div class="scan-status" id="discoveryStatus">Inactif</div>
+                </div>
+
+                <!-- Liste des appareils -->
+                <div class="devices-list" id="devicesList">
+                    <div class="loading">En attente...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1jzVn1fCdg4J0r3EL1pUlxbWb5QpD++0h+K7S+1o=" crossorigin=""></script>
+    <script src="renderer.js"></script>
+</body>
+</html>

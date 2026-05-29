@@ -1,17 +1,16 @@
 {
-  "name": "projet-iot",
+  "name": "carplay-interface",
   "version": "1.0.0",
-  "description": "",
+  "description": "Interface CarPlay pour Raspberry Pi avec contrôle GPS, Bluetooth et Mirroring",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dev": "electron . --development"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Speed",
+  "license": "MIT",
   "dependencies": {
-    "electron": "^41.1.1",
-    "express": "^5.2.1"
-  },
-  "type": "commonjs"
+    "electron": "21.4.0",
+    "dbus-next": "^0.10.2"
+  }
 }
